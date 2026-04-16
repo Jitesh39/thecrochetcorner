@@ -1,0 +1,199 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import { Star, ShoppingBag, ChevronDown, Check } from "lucide-react";
+import { useCartStore } from "@/store/cartStore";
+import { db } from "@/lib/firebase";
+import { collection, onSnapshot } from "firebase/firestore";
+
+export default function ShopPage() {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [sortBy, setSortBy] = useState("Featured");
+  const [isSortOpen, setIsSortOpen] = useState(false);
+  const addItem = useCartStore((state) => state.addItem);
+
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, "products"), (snapshot) => {
+      const productsData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setProducts(productsData);
+      setLoading(false);
+    });
+
+    return () => unsub();
+  }, []);
+
+  const categories = ["All", "Flowers", "Bouquets", "Gifts", "Accessories"]; // Updated to match Admin panel categories
+  const sortOptions = ["Featured", "Price: Low to High", "Price: High to Low"];
+
+  const filteredProducts = products
+    .filter(p => selectedCategory === "All" || p.category === selectedCategory)
+    .sort((a, b) => {
+      if (sortBy === "Price: Low to High") return a.price - b.price;
+      if (sortBy === "Price: High to Low") return b.price - a.price;
+      return 0; // Featured
+    });
+
+  return (
+    <div className="bg-[#fcfbf9] min-h-screen pt-6 pb-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        {/* Header */}
+        <div className="text-center mb-16">
+          <h1 className="text-5xl md:text-5xl font-serif font-bold text-[var(--color-text-main)] mb-4">
+            Our Collection
+          </h1>
+          <p className="text-[var(--color-text-muted)] max-w-xl mx-auto">
+            Each piece is handcrafted with premium yarn and hours of careful stitching
+          </p>
+        </div>
+
+        {/* Filters and Sort Row */}
+        <div className="flex flex-col lg:flex-row justify-between items-center gap-8 mb-16 px-2">
+          {/* Category Pill Filters */}
+          <div className="flex items-center gap-3 overflow-x-auto no-scrollbar w-full lg:w-auto pb-2 lg:pb-0">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={`whitespace-nowrap px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-300 border ${selectedCategory === cat
+                  ? "bg-[#f4e8e8] text-[var(--color-primary-dark)] border-[#f4e8e8] shadow-sm"
+                  : "bg-white text-gray-500 border-gray-100 hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
+                  }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+
+          {/* Sort Dropdown */}
+          <div className="relative w-full sm:w-64 lg:w-48 self-end lg:self-center">
+            <button
+              onClick={() => setIsSortOpen(!isSortOpen)}
+              className="w-full flex items-center justify-between px-5 py-3 bg-white border border-gray-100 rounded-xl text-sm font-medium text-gray-600 hover:border-gray-200 transition-all shadow-sm"
+            >
+              <span className="text-gray-400 mr-2">Sort by:</span>
+              <span className="flex-grow text-left">{sortBy}</span>
+              <ChevronDown size={16} className={`ml-2 transition-transform duration-300 ${isSortOpen ? "rotate-180" : ""}`} />
+            </button>
+
+            {isSortOpen && (
+              <div className="absolute top-full mt-2 left-0 w-full bg-white border border-gray-50 rounded-2xl shadow-xl z-30 py-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                {sortOptions.map((opt) => (
+                  <button
+                    key={opt}
+                    onClick={() => { setSortBy(opt); setIsSortOpen(false); }}
+                    className={`w-full text-left px-5 py-3 text-sm transition-colors flex items-center justify-between ${sortBy === opt ? "bg-[var(--color-secondary)]/30 text-[var(--color-primary)] font-bold" : "text-gray-600 hover:bg-gray-50"
+                      }`}
+                  >
+                    {opt}
+                    {sortBy === opt && <Check size={14} />}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Product Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+          {loading ? (
+            <div className="col-span-full py-20 text-center font-bold text-gray-400">Loading collection...</div>
+          ) : filteredProducts.map((product) => (
+            <div
+              key={product.id}
+              className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden flex flex-col h-full border border-gray-50/50"
+            >
+              {/* Image Container */}
+              <div className="relative aspect-square w-full bg-gray-50/50 flex items-center justify-center overflow-hidden">
+                {/* New Badge */}
+                {product.category && (
+                  <span className="absolute top-6 left-6 z-10 bg-[var(--color-primary)] text-white text-[10px] font-bold uppercase tracking-widest px-4 py-1.5 rounded-full shadow-sm">
+                    {product.category}
+                  </span>
+                )}
+
+                <div className="relative w-full h-full transform transition-transform duration-700 group-hover:scale-110">
+                  <Image
+                    src={product.imageUrl || "/img1.png"}
+                    alt={product.name}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  />
+                </div>
+              </div>
+
+              {/* Product Info */}
+              <div className="p-8 flex flex-col flex-grow">
+                <div className="flex justify-between items-start mb-1.5 gap-4">
+                  <h3 className="text-xl font-serif font-bold text-[var(--color-text-main)] leading-snug">
+                    {product.name}
+                  </h3>
+                  <p className="text-xl font-bold text-[var(--color-text-main)] whitespace-nowrap">
+                    ₹{product.price}
+                  </p>
+                </div>
+
+                {/* Stars and Rating */}
+                <div className="flex items-center gap-1 mb-4">
+                  <div className="flex text-yellow-400">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        size={14}
+                        fill={i < 5 ? "currentColor" : "none"}
+                        className={i < 5 ? "" : "text-gray-200"}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-xs text-gray-400 font-medium ml-1">
+                    (New Arrival)
+                  </span>
+                </div>
+
+                {/* Add to Cart Button */}
+                <button
+                  onClick={() => addItem(product)}
+                  className="mt-auto w-full flex items-center justify-center gap-3 border border-gray-100 py-4 rounded-full text-[var(--color-text-main)] font-medium transition-all duration-300 hover:bg-[var(--color-primary)] hover:text-white hover:border-[var(--color-primary)] group/btn relative overflow-hidden shadow-sm"
+                >
+                  <ShoppingBag size={18} strokeWidth={1.5} className="transition-transform group-hover/btn:-translate-y-1" />
+                  <span>Add to Cart</span>
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Empty State */}
+        {filteredProducts.length === 0 && (
+          <div className="py-24 text-center bg-white rounded-[3rem] border border-dashed border-gray-200">
+            <p className="text-2xl font-serif text-gray-300">No products found in this category.</p>
+            <button
+              onClick={() => setSelectedCategory("All")}
+              className="mt-6 text-[var(--color-primary)] font-bold decoration-dotted underline underline-offset-4"
+            >
+              View All Collection
+            </button>
+          </div>
+        )}
+      </div>
+
+      <style jsx>{`
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none; /* IE and Edge */
+          scrollbar-width: none; /* Firefox */
+        }
+      `}</style>
+    </div>
+  );
+}
+
