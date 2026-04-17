@@ -52,7 +52,7 @@ export default function Navbar() {
   const navLinks = [
     { name: "Home", href: "/" },
     { name: "Shop", href: "/shop" },
-    { name: "Crochet Studio", href: "/custom" },
+    { name: "Custom Order", href: "/custom" },
     { name: "Contact", href: "/contact" },
   ];
 
@@ -85,7 +85,7 @@ export default function Navbar() {
 
           {/* Icons */}
           <div className="flex items-center space-x-4 sm:space-x-6">
-            <button 
+            <button
               onClick={handleProfileClick}
               className="text-[var(--color-text-main)] hover:text-[var(--color-primary)] transition-colors"
             >

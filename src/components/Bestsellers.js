@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Star, ShoppingBag } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
 import { db } from "@/lib/firebase";
@@ -42,13 +43,13 @@ export default function Bestsellers() {
           {loading ? (
             <div className="col-span-full py-20 text-center font-bold text-gray-400">Syncing latest products...</div>
           ) : products.map((product) => (
-            <div
+            <Link
               key={product.id}
-              className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden flex flex-col h-full"
+              href={`/product/${product.id}`}
+              className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden flex flex-col h-full cursor-pointer"
             >
               {/* Product Image Area */}
               <div className="relative aspect-square w-full bg-gray-50 flex items-center justify-center overflow-hidden">
-                {/* Badge */}
                 <span className={`absolute top-4 left-4 bg-[var(--color-primary)] text-white text-[9px] font-bold uppercase tracking-widest px-3 py-1 rounded-full z-10 shadow-sm`}>
                   {product.category || "Best Item"}
                 </span>
@@ -67,7 +68,7 @@ export default function Bestsellers() {
               {/* Product Info */}
               <div className="p-5 flex flex-col flex-grow">
                 <div className="flex justify-between items-start mb-1">
-                  <h3 className="text-lg font-serif text-[var(--color-text-main)] leading-snug pr-4">
+                  <h3 className="text-lg font-serif text-[var(--color-text-main)] leading-snug pr-4 group-hover:text-[var(--color-primary)] transition-colors line-clamp-2">
                     {product.name}
                   </h3>
                   <p className="text-lg font-medium text-[var(--color-primary)] whitespace-nowrap">
@@ -75,7 +76,6 @@ export default function Bestsellers() {
                   </p>
                 </div>
 
-                {/* Rating */}
                 <div className="flex items-center gap-1 mb-3">
                   <div className="flex text-yellow-400">
                     {[...Array(5)].map((_, i) => (
@@ -87,21 +87,22 @@ export default function Bestsellers() {
                       />
                     ))}
                   </div>
-                  <span className="text-[10px] text-gray-400 font-medium ml-1">
-                    (Handmade)
-                  </span>
+                  <span className="text-[10px] text-gray-400 font-medium ml-1">(Handmade)</span>
                 </div>
 
-                {/* Add to Cart Button */}
                 <button
-                  onClick={() => addItem(product)}
-                  className="mt-auto w-full flex items-center justify-center gap-2 border border-gray-200 py-2.5 rounded-full text-sm text-[var(--color-text-main)] font-medium transition-all duration-300 hover:bg-[var(--color-primary)] hover:text-white hover:border-[var(--color-primary)] shadow-sm"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    addItem(product);
+                  }}
+                  className="mt-auto w-full flex items-center justify-center gap-2 border border-gray-200 py-2.5 rounded-full text-sm text-[var(--color-text-main)] font-medium transition-all duration-300 hover:bg-[var(--color-primary)] hover:text-white hover:border-[var(--color-primary)] shadow-sm relative z-10"
                 >
                   <ShoppingBag size={16} strokeWidth={1.5} />
                   <span>Add to Cart</span>
                 </button>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

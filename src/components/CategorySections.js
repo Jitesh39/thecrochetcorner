@@ -75,9 +75,10 @@ export default function CategorySections() {
               {/* Product Grid / Horizontal Scroll */}
               <div className="flex overflow-x-auto lg:grid lg:grid-cols-5 gap-6 no-scrollbar pb-8 -mx-4 px-4 sm:mx-0 sm:px-0 snap-x snap-mandatory lg:snap-none lg:overflow-visible lg:pb-0">
                 {cat.products.map((product) => (
-                  <div
+                  <Link
                     key={product.id}
-                    className="min-w-[75%] sm:min-w-[45%] lg:min-w-0 snap-start flex-shrink-0 lg:flex-shrink group bg-[#f5f1ed]/50 hover:bg-white rounded-[1.5rem] p-4 transition-all duration-500 shadow-sm hover:shadow-2xl border border-transparent hover:border-gray-50 flex flex-col h-full transform hover:-translate-y-2"
+                    href={`/product/${product.id}`}
+                    className="min-w-[75%] sm:min-w-[45%] lg:min-w-0 snap-start flex-shrink-0 lg:flex-shrink group bg-[#f5f1ed]/50 hover:bg-white rounded-[1.5rem] p-4 transition-all duration-500 shadow-sm hover:shadow-2xl border border-transparent hover:border-gray-50 flex flex-col h-full transform hover:-translate-y-2 cursor-pointer"
                   >
                     {/* Image Area */}
                     <div className="relative aspect-square w-full rounded-xl overflow-hidden mb-4 bg-gray-50 flex items-center justify-center group-hover:bg-[#fcfbf9] transition-colors">
@@ -108,14 +109,18 @@ export default function CategorySections() {
                       <div className="mt-auto flex items-center justify-between gap-3">
                         <span className="text-lg font-bold text-[var(--color-text-main)]">₹{product.price}</span>
                         <button
-                          onClick={() => addItem(product)}
-                          className="p-2.5 rounded-full bg-white border border-gray-100 text-[var(--color-text-main)] hover:bg-[var(--color-primary)] hover:text-white hover:border-[var(--color-primary)] transition-all duration-300 shadow-sm hover:shadow-lg group/btn"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            addItem(product);
+                          }}
+                          className="p-2.5 rounded-full bg-white border border-gray-100 text-[var(--color-text-main)] hover:bg-[var(--color-primary)] hover:text-white hover:border-[var(--color-primary)] transition-all duration-300 shadow-sm hover:shadow-lg group/btn relative z-10"
                         >
                           <ShoppingCart size={16} strokeWidth={1.5} className="group-hover/btn:scale-110 transition-transform" />
                         </button>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 ))}
 
                 {/* Spacer for end of scroll */}

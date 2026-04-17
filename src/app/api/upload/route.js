@@ -10,31 +10,23 @@ cloudinary.config({
 
 export async function POST(request) {
   try {
-    const formData = await request.formData();
-    const file = formData.get("file");
+    const { file } = await request.json(); // Expected base64 string
 
     if (!file) {
-      return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
+      return NextResponse.json({ error: "No file data provided" }, { status: 400 });
     }
 
-    // Convert file to Buffer
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-
-    // Upload to Cloudinary using a Promise-based approach
-    const uploadResponse = await new Promise((resolve, reject) => {
-      cloudinary.uploader.upload_stream(
-        { folder: "crochet_corner_products" },
-        (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
-        }
-      ).end(buffer);
+    // Upload to Cloudinary using base64 string
+    const uploadResponse = await cloudinary.uploader.upload(file, {
+      folder: "crochet_corner_products",
     });
 
     return NextResponse.json({ url: uploadResponse.secure_url });
   } catch (error) {
-    console.error("Cloudinary upload error:", error);
-    return NextResponse.json({ error: "Upload failed" }, { status: 500 });
+    console.log("UPLOAD ERROR DETAILED:", error);
+    return NextResponse.json({
+      error: "Upload failed",
+      details: error.message
+    }, { status: 500 });
   }
 }
