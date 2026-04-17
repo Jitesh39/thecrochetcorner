@@ -9,11 +9,26 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
+import { db } from "@/lib/firebase";
+import { collection, query, where, onSnapshot } from "firebase/firestore";
 
 export default function AdminLayout({ children }) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const { user, role, loading } = useAuthStore();
   const router = useRouter();
+
+  // Listen for unread notifications
+  useEffect(() => {
+    if (role !== "admin") return;
+
+    const q = query(collection(db, "notifications"), where("isRead", "==", false));
+    const unsub = onSnapshot(q, (snapshot) => {
+      setUnreadCount(snapshot.size);
+    });
+
+    return () => unsub();
+  }, [role]);
 
   useEffect(() => {
     if (!loading && (!user || role !== "admin")) {
@@ -62,9 +77,14 @@ export default function AdminLayout({ children }) {
 
           {/* Right Section: Profile & Actions */}
           <div className="flex items-center gap-2 sm:gap-4">
-            <button className="hidden sm:flex p-2 text-gray-400 hover:text-[var(--color-primary)] hover:bg-gray-50 rounded-full transition-all">
+            <Link href="/admin/notifications" className="relative p-2 text-gray-400 hover:text-[var(--color-primary)] hover:bg-gray-50 rounded-full transition-all">
               <Bell size={20} />
-            </button>
+              {unreadCount > 0 && (
+                <span className="absolute top-1 right-1 bg-red-500 text-white text-[10px] font-bold h-4 w-4 rounded-full flex items-center justify-center ring-2 ring-white">
+                  {unreadCount}
+                </span>
+              )}
+            </Link>
 
             <div className="h-8 w-px bg-gray-100 mx-1 hidden sm:block"></div>
 

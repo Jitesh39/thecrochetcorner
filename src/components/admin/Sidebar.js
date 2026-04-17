@@ -12,7 +12,8 @@ import {
   Heart,
   Store,
   X,
-  LogOut
+  LogOut,
+  Bell
 } from "lucide-react";
 
 const menuItems = [
@@ -20,6 +21,7 @@ const menuItems = [
   { name: "Manage Products", icon: Package, href: "/admin/products" },
   { name: "Orders", icon: ShoppingBag, href: "/admin/orders" },
   { name: "Custom Orders", icon: Heart, href: "/admin/custom-orders" },
+  { name: "Notifications", icon: Bell, href: "/admin/notifications" },
   { name: "Pending Orders", icon: Clock, href: "/admin/pending" },
   { name: "View Store", icon: Store, href: "/#" },
 ];

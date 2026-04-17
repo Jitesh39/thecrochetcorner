@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { useAuthStore } from "@/store/authStore";
 import { db } from "@/lib/firebase";
-import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
-import { ShoppingBag, Search, Filter, ArrowUpRight } from "lucide-react";
+import { collection, query, where, onSnapshot, orderBy } from "firebase/firestore";
+import { ShoppingBag, Search, Loader2, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 
 export default function MyOrders() {
@@ -19,33 +19,40 @@ export default function MyOrders() {
 
   useEffect(() => {
     if (!user) return;
-    const fetchOrders = async () => {
-      try {
-        // Fetch Regular Orders
-        const q = query(collection(db, "orders"), where("userId", "==", user.uid), orderBy("createdAt", "desc"));
-        const snap = await getDocs(q);
-        const regularOrders = snap.docs.map(doc => ({ id: doc.id, ...doc.data(), isCustom: false }));
 
-        // Fetch Custom Orders
-        const cq = query(collection(db, "customOrders"), where("userId", "==", user.uid), orderBy("createdAt", "desc"));
-        const csnap = await getDocs(cq);
-        const customOrders = csnap.docs.map(doc => ({ id: doc.id, ...doc.data(), isCustom: true }));
+    // Listen for Regular Orders
+    const q = query(collection(db, "orders"), where("userId", "==", user.uid), orderBy("createdAt", "desc"));
+    const unsubRegular = onSnapshot(q, (snapshot) => {
+      const regularOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), isCustom: false }));
+      updateCombinedOrders(regularOrders, null);
+    });
 
-        // Combine and Sort
-        const allOrders = [...regularOrders, ...customOrders].sort((a, b) => {
+    // Listen for Custom Orders
+    const cq = query(collection(db, "customOrders"), where("userId", "==", user.uid), orderBy("createdAt", "desc"));
+    const unsubCustom = onSnapshot(cq, (snapshot) => {
+      const customOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), isCustom: true }));
+      updateCombinedOrders(null, customOrders);
+    });
+
+    const updateCombinedOrders = (newRegular, newCustom) => {
+      setOrders(prev => {
+        let currentRegular = newRegular || prev.filter(o => !o.isCustom);
+        let currentCustom = newCustom || prev.filter(o => o.isCustom);
+
+        const combined = [...currentRegular, ...currentCustom].sort((a, b) => {
           const timeA = a.createdAt?.toMillis?.() || 0;
           const timeB = b.createdAt?.toMillis?.() || 0;
           return timeB - timeA;
         });
-
-        setOrders(allOrders);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
+        return combined;
+      });
+      setLoading(false);
     };
-    fetchOrders();
+
+    return () => {
+      unsubRegular();
+      unsubCustom();
+    };
   }, [user]);
 
   return (
@@ -63,17 +70,15 @@ export default function MyOrders() {
             <input
               type="text"
               placeholder="Search orders..."
-              suppressHydrationWarning
               className="w-full bg-gray-50 border border-transparent rounded-xl py-2 px-4 pl-10 text-sm outline-none focus:bg-white focus:border-[var(--color-primary)] transition-all"
             />
             <Search size={16} className="absolute left-3 top-2.5 text-gray-400" />
           </div>
 
           <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0">
-            {["All", "Processing", "Shipped", "Delivered"].map((status) => (
+            {["All", "Pending", "Accepted", "Shipped", "Delivered"].map((status) => (
               <button
                 key={status}
-                suppressHydrationWarning
                 className={`whitespace-nowrap px-4 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase transition-all ${status === "All" ? "bg-[var(--color-primary)] text-white shadow-md shadow-[var(--color-primary)]/20" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
                   }`}
               >
@@ -84,7 +89,10 @@ export default function MyOrders() {
         </div>
 
         {loading ? (
-          <div className="py-20 text-center text-gray-400 font-medium">Loading orders...</div>
+          <div className="py-20 flex flex-col items-center justify-center text-gray-400">
+            <Loader2 size={32} className="animate-spin mb-4" />
+            <p>Loading your orders...</p>
+          </div>
         ) : orders.length === 0 ? (
           <div className="py-32 text-center text-gray-300">
             <ShoppingBag size={48} className="mx-auto mb-4 opacity-10" />
@@ -105,7 +113,7 @@ export default function MyOrders() {
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {orders.map((order) => (
-                  <tr key={order.id} className="hover:bg-gray-50/50 transition-colors group cursor-pointer">
+                  <tr key={order.id} className="hover:bg-gray-50/50 transition-colors group">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-gray-700">#{order.id.slice(-6).toUpperCase()}</span>
@@ -117,19 +125,20 @@ export default function MyOrders() {
                         {order.isCustom ? "Custom Order" : "Store Purchase"}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-gray-400 font-medium">
-                      {hasMounted && (order.createdAt?.toDate ? order.createdAt.toDate().toLocaleDateString() : "Pending")}
+                    <td className="px-6 py-4 text-gray-400 font-medium whitespace-nowrap">
+                      {hasMounted && (order.createdAt?.toDate ? order.createdAt.toDate().toLocaleDateString() : "Just now")}
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`px-2 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider ${order.status === "Delivered" || order.status === "Accepted" ? "bg-green-50 text-green-600" :
-                          order.status === "Hold" ? "bg-orange-50 text-orange-600" :
-                            "bg-blue-50 text-blue-600"
-                        }`}>
-                        {order.status || (order.isCustom ? "Pending" : "Processing")}
+                      <span className={`px-2 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider ${
+                        order.status === "Delivered" || order.status === "Accepted" ? "bg-green-50 text-green-600" :
+                        order.status === "Hold" ? "bg-orange-50 text-orange-600" :
+                        "bg-blue-50 text-blue-600"
+                      }`}>
+                        {order.status || "Pending"}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right font-bold text-gray-800">
-                      ₹{order.isCustom ? (order.price || 0) : order.totalAmount}
+                      ₹{order.isCustom ? (order.price || 0) : order.totalAmount?.toLocaleString()}
                     </td>
                   </tr>
                 ))}

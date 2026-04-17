@@ -1,15 +1,20 @@
 "use client";
 
 import { useCartStore } from "@/store/cartStore";
+import { useAuthStore } from "@/store/authStore";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { CreditCard, Lock, CheckCircle } from "lucide-react";
+import { CreditCard, Lock, CheckCircle, Loader2 } from "lucide-react";
+import { db } from "@/lib/firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 export default function CheckoutPage() {
   const { items, getCartTotal, clearCart } = useCartStore();
+  const { user, loading: authLoading } = useAuthStore();
   const [mounted, setMounted] = useState(false);
   const [ordered, setOrdered] = useState(false);
+  const [placing, setPlacing] = useState(false);
   const router = useRouter();
 
   const [formData, setFormData] = useState({
@@ -21,7 +26,18 @@ export default function CheckoutPage() {
     setMounted(true);
   }, []);
 
-  if (!mounted) return null;
+  // Auth Guard
+  useEffect(() => {
+    if (mounted && !authLoading && !user) {
+      router.push("/login?redirect=/checkout");
+    }
+  }, [mounted, authLoading, user, router]);
+
+  if (!mounted || authLoading) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <Loader2 className="animate-spin text-[var(--color-primary)]" size={32} />
+    </div>
+  );
 
   if (items.length === 0 && !ordered) {
     router.push("/cart");
@@ -33,34 +49,78 @@ export default function CheckoutPage() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handlePlaceOrder = (e) => {
+  const handlePlaceOrder = async (e) => {
     e.preventDefault();
-    // Razorpay Integration Placeholder
-    // In a real implementation, you would:
-    // 1. Create order on backend and get order_id
-    // 2. Open Razorpay checkout with order_id
-    // 3. On success, verify signature and save order to Firestore
+    if (!user) return;
+
+    setPlacing(true);
     
-    // Simulating successful order
-    setTimeout(() => {
+    try {
+      // 1. Prepare Order Data
+      const orderData = {
+        userId: user.uid,
+        customerName: `${formData.firstName} ${formData.lastName}`,
+        customerEmail: formData.email,
+        customerPhone: formData.phone,
+        shippingAddress: {
+          address: formData.address,
+          city: formData.city,
+          state: formData.state,
+          pincode: formData.pincode
+        },
+        items: items.map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          image: item.images?.[0] || item.imageUrl || ""
+        })),
+        totalAmount: getCartTotal(),
+        status: "Pending",
+        createdAt: serverTimestamp(),
+        notes: formData.notes
+      };
+
+      // 2. Save to Firestore
+      const orderRef = await addDoc(collection(db, "orders"), orderData);
+
+      // 3. Create Admin Notification
+      await addDoc(collection(db, "notifications"), {
+        orderId: orderRef.id,
+        userId: user.uid,
+        customerName: orderData.customerName,
+        customerEmail: orderData.customerEmail,
+        totalAmount: orderData.totalAmount,
+        productNames: items.map(i => i.name).join(", "),
+        isRead: false,
+        type: "new-order",
+        createdAt: serverTimestamp()
+      });
+
+      // 4. Success UI
       setOrdered(true);
       clearCart();
-    }, 1500);
+    } catch (error) {
+      console.error("Error placing order:", error);
+      alert("Failed to place order. Please try again.");
+    } finally {
+      setPlacing(false);
+    }
   };
 
   if (ordered) {
     return (
       <div className="min-h-screen bg-[var(--color-background)] flex items-center justify-center p-4">
-        <div className="bg-white max-w-lg w-full rounded-3xl p-10 text-center shadow-lg border border-gray-100">
+        <div className="bg-white max-w-lg w-full rounded-3xl p-10 text-center shadow-lg border border-gray-100 animate-in zoom-in duration-300">
           <div className="w-20 h-20 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle size={40} />
           </div>
           <h1 className="text-3xl font-serif text-[var(--color-text-main)] mb-4">Thank You!</h1>
           <p className="text-[var(--color-text-muted)] mb-8">
-            Your order has been placed successfully. We'll send you an email confirmation with tracking details soon.
+            Your order has been placed successfully. We've received your request and our team will start processing it soon.
           </p>
-          <button onClick={() => router.push("/")} className="btn-primary w-full">
-            Back to Home
+          <button onClick={() => router.push("/dashboard/orders")} className="btn-primary w-full py-4">
+            Track My Order
           </button>
         </div>
       </div>
@@ -81,7 +141,7 @@ export default function CheckoutPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-[var(--color-text-main)] mb-1">First Name</label>
-                    <input required type="text" name="firstName" value={formData.firstName} onChange={handleInputChange} className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] transition-all" />
+                    <input required type="text" name="firstName" value={formData.firstName} onChange={handleInputChange} className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-[var(--color-primary)] transition-all" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-[var(--color-text-main)] mb-1">Last Name</label>
@@ -127,8 +187,16 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                <button type="submit" className="w-full btn-primary py-4 text-lg flex justify-center items-center gap-2 mt-8">
-                  Pay ₹{getCartTotal().toLocaleString("en-IN")} <Lock size={16} />
+                <button 
+                  type="submit" 
+                  disabled={placing}
+                  className="w-full btn-primary py-4 text-lg flex justify-center items-center gap-2 mt-8 disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {placing ? (
+                    <><Loader2 className="animate-spin" size={20} /> Processing...</>
+                  ) : (
+                    <>Pay ₹{getCartTotal().toLocaleString("en-IN")} <Lock size={16} /></>
+                  )}
                 </button>
               </form>
             </div>
@@ -143,7 +211,7 @@ export default function CheckoutPage() {
                 {items.map((item) => (
                   <div key={item.id} className="flex gap-4">
                     <div className="relative w-16 h-16 rounded-lg bg-gray-50 overflow-hidden flex-shrink-0 border border-gray-100">
-                      <Image src={item.images?.[0]} alt={item.name} fill className="object-cover" />
+                      <Image src={item.images?.[0] || item.imageUrl} alt={item.name} fill className="object-cover" />
                       <span className="absolute -top-2 -right-2 bg-gray-500 text-white text-[10px] font-bold h-5 w-5 rounded-full flex items-center justify-center border-2 border-white">
                         {item.quantity}
                       </span>
