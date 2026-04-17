@@ -52,8 +52,9 @@ export default function NotificationsPage() {
       await updateDoc(doc(db, "orders", orderId), {
         status: "Accepted"
       });
-      // Mark notification as read
+      // Mark notification as accepted and read
       await updateDoc(doc(db, "notifications", notifyId), {
+        isAccepted: true,
         isRead: true
       });
       alert("Order accepted successfully!");
@@ -122,7 +123,7 @@ export default function NotificationsPage() {
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0 self-end md:self-center">
-                  {!notification.isRead && (
+                  {!notification.isRead && !notification.isAccepted && (
                     <button 
                       onClick={() => handleMarkAsRead(notification.id)}
                       className="p-3 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-2xl transition-all"
@@ -131,13 +132,19 @@ export default function NotificationsPage() {
                       <Eye size={20} />
                     </button>
                   )}
-                  <button 
-                    disabled={actionId === notification.id}
-                    onClick={() => handleAcceptOrder(notification.id, notification.orderId)}
-                    className="flex items-center gap-2 px-6 py-3 bg-[var(--color-primary)] text-white rounded-2xl text-xs font-bold uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-md shadow-[var(--color-primary)]/10 disabled:opacity-50"
-                  >
-                    {actionId === notification.id ? <Loader2 size={16} className="animate-spin" /> : <><CheckCircle size={16} /> Accept Order</>}
-                  </button>
+                  {notification.isAccepted ? (
+                    <div className="flex items-center gap-2 px-6 py-3 bg-green-50 text-green-600 border border-green-100 rounded-2xl text-xs font-bold uppercase tracking-widest">
+                      <CheckCircle size={16} /> Accepted
+                    </div>
+                  ) : (
+                    <button 
+                      disabled={actionId === notification.id}
+                      onClick={() => handleAcceptOrder(notification.id, notification.orderId)}
+                      className="flex items-center gap-2 px-6 py-3 bg-[var(--color-primary)] text-white rounded-2xl text-xs font-bold uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-md shadow-[var(--color-primary)]/10 disabled:opacity-50"
+                    >
+                      {actionId === notification.id ? <Loader2 size={16} className="animate-spin" /> : <><CheckCircle size={16} /> Accept Order</>}
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

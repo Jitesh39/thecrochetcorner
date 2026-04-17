@@ -51,7 +51,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-[var(--color-secondary)] pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-[var(--color-text-muted)]">
-          <p>&copy; {new Date().getFullYear()} The Crochet Corner. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} TheCrochetCorner. All rights reserved.</p>
           <p className="flex items-center mt-2 md:mt-0">
             Handmade with <Heart size={12} className="mx-1 text-[var(--color-primary)] fill-[var(--color-primary)]" /> and lots of yarn.
           </p>

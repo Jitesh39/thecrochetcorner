@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuthStore } from "@/store/authStore";
 import { db } from "@/lib/firebase";
 import { collection, query, where, onSnapshot, orderBy } from "firebase/firestore";
-import { ShoppingBag, Search, Loader2, ArrowUpRight } from "lucide-react";
+import { ShoppingBag, Search, Loader2, ArrowUpRight, Search as SearchIcon } from "lucide-react";
 import Link from "next/link";
 
 export default function MyOrders() {
@@ -12,6 +12,8 @@ export default function MyOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [hasMounted, setHasMounted] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeFilter, setActiveFilter] = useState("All");
 
   useEffect(() => {
     setHasMounted(true);
@@ -25,6 +27,9 @@ export default function MyOrders() {
     const unsubRegular = onSnapshot(q, (snapshot) => {
       const regularOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), isCustom: false }));
       updateCombinedOrders(regularOrders, null);
+    }, (err) => {
+        console.error("Regular orders error:", err);
+        setLoading(false);
     });
 
     // Listen for Custom Orders
@@ -32,6 +37,8 @@ export default function MyOrders() {
     const unsubCustom = onSnapshot(cq, (snapshot) => {
       const customOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), isCustom: true }));
       updateCombinedOrders(null, customOrders);
+    }, (err) => {
+        console.error("Custom orders error:", err);
     });
 
     const updateCombinedOrders = (newRegular, newCustom) => {
@@ -55,6 +62,13 @@ export default function MyOrders() {
     };
   }, [user]);
 
+  const filteredOrders = orders.filter(order => {
+    const matchesSearch = order.id.toLowerCase().includes(searchTerm.toLowerCase());
+    const orderStatus = order.status || (order.isCustom ? "Pending" : "Processing");
+    const matchesFilter = activeFilter === "All" || orderStatus === activeFilter;
+    return matchesSearch && matchesFilter;
+  });
+
   return (
     <div className="space-y-8 animate-in slide-in-from-bottom duration-500">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -65,21 +79,27 @@ export default function MyOrders() {
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden min-h-[400px]">
-        <div className="p-6 border-b border-gray-50 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="relative w-full md:w-64">
+        <div className="p-6 border-b border-gray-50 flex flex-col lg:flex-row items-center justify-between gap-6">
+          <div className="relative w-full lg:w-64">
             <input
               type="text"
-              placeholder="Search orders..."
-              className="w-full bg-gray-50 border border-transparent rounded-xl py-2 px-4 pl-10 text-sm outline-none focus:bg-white focus:border-[var(--color-primary)] transition-all"
+              placeholder="Search by order ID..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-gray-50 border border-transparent rounded-xl py-2.5 px-4 pl-10 text-sm outline-none focus:bg-white focus:border-[var(--color-primary)] transition-all"
             />
-            <Search size={16} className="absolute left-3 top-2.5 text-gray-400" />
+            <SearchIcon size={16} className="absolute left-3 top-3 text-gray-400" />
           </div>
 
-          <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0">
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar w-full lg:w-auto pb-1">
             {["All", "Pending", "Accepted", "Shipped", "Delivered"].map((status) => (
               <button
                 key={status}
-                className={`whitespace-nowrap px-4 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase transition-all ${status === "All" ? "bg-[var(--color-primary)] text-white shadow-md shadow-[var(--color-primary)]/20" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
+                onClick={() => setActiveFilter(status)}
+                className={`whitespace-nowrap px-5 py-2 rounded-full text-[10px] font-bold tracking-widest uppercase transition-all duration-300 ${
+                    activeFilter === status 
+                      ? "bg-[var(--color-primary)] text-white shadow-lg shadow-[var(--color-primary)]/20 scale-105" 
+                      : "bg-gray-50 text-gray-400 hover:bg-gray-100"
                   }`}
               >
                 {status}
@@ -93,18 +113,19 @@ export default function MyOrders() {
             <Loader2 size={32} className="animate-spin mb-4" />
             <p>Loading your orders...</p>
           </div>
-        ) : orders.length === 0 ? (
-          <div className="py-32 text-center text-gray-300">
+        ) : filteredOrders.length === 0 ? (
+          <div className="py-32 text-center text-gray-300 px-6">
             <ShoppingBag size={48} className="mx-auto mb-4 opacity-10" />
-            <p className="text-sm font-medium">No orders found.</p>
+            <p className="text-sm font-medium">No {activeFilter !== "All" ? activeFilter.toLowerCase() : ""} orders found.</p>
             <Link href="/shop" className="btn-primary mt-6 inline-flex px-8 py-2.5 font-bold">Start Shopping</Link>
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
+            <table className="w-full text-left text-sm min-w-[700px]">
               <thead className="bg-gray-50/50 text-[10px] uppercase tracking-widest font-bold text-gray-400">
                 <tr>
                   <th className="px-6 py-4">Order ID</th>
+                  <th className="px-6 py-4">Items</th>
                   <th className="px-6 py-4">Type</th>
                   <th className="px-6 py-4">Date</th>
                   <th className="px-6 py-4">Status</th>
@@ -112,15 +133,35 @@ export default function MyOrders() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {orders.map((order) => (
+                {filteredOrders.map((order) => (
                   <tr key={order.id} className="hover:bg-gray-50/50 transition-colors group">
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-gray-700">#{order.id.slice(-6).toUpperCase()}</span>
                         <ArrowUpRight size={14} className="text-gray-300 group-hover:text-[var(--color-primary)] transition-colors" />
                       </div>
                     </td>
                     <td className="px-6 py-4">
+                      {order.isCustom ? (
+                        <div className="h-10 w-10 rounded-full bg-pink-50 flex items-center justify-center text-pink-500">
+                          <ShoppingBag size={20} />
+                        </div>
+                      ) : (
+                        <div className="flex -space-x-2 overflow-hidden">
+                          {order.items?.map((item, idx) => (
+                            <Link 
+                              key={idx} 
+                              href={`/product/${item.id}`}
+                              title={item.name}
+                              className="inline-block h-10 w-10 rounded-full ring-2 ring-white bg-gray-50 overflow-hidden relative cursor-pointer hover:scale-110 transition-transform z-10 hover:z-20"
+                            >
+                              <img src={item.image || "/placeholder.png"} alt={item.name} className="object-cover h-full w-full" />
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`text-[10px] font-bold uppercase tracking-widest ${order.isCustom ? "text-pink-500" : "text-blue-500"}`}>
                         {order.isCustom ? "Custom Order" : "Store Purchase"}
                       </span>
@@ -128,16 +169,16 @@ export default function MyOrders() {
                     <td className="px-6 py-4 text-gray-400 font-medium whitespace-nowrap">
                       {hasMounted && (order.createdAt?.toDate ? order.createdAt.toDate().toLocaleDateString() : "Just now")}
                     </td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider ${
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-2.5 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${
                         order.status === "Delivered" || order.status === "Accepted" ? "bg-green-50 text-green-600" :
                         order.status === "Hold" ? "bg-orange-50 text-orange-600" :
                         "bg-blue-50 text-blue-600"
                       }`}>
-                        {order.status || "Pending"}
+                        {order.status || (order.isCustom ? "Pending" : "Processing")}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-right font-bold text-gray-800">
+                    <td className="px-6 py-4 text-right font-bold text-gray-800 whitespace-nowrap">
                       ₹{order.isCustom ? (order.price || 0) : order.totalAmount?.toLocaleString()}
                     </td>
                   </tr>
