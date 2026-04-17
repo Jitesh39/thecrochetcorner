@@ -75,7 +75,7 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h3 className="font-serif text-lg font-bold text-[var(--color-text-main)] mb-1 uppercase text-xs tracking-widest">Email</h3>
-                  <p className="text-[var(--color-text-muted)]">aayushik484@gmail.com</p>
+                  <p className="text-[var(--color-text-muted)]">thecrochetcorner@gmail.com</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">
@@ -84,7 +84,7 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h3 className="font-serif text-lg font-bold text-[var(--color-text-main)] mb-1 uppercase text-xs tracking-widest">Phone</h3>
-                  <p className="text-[var(--color-text-muted)]">+91 6204228179</p>
+                  <p className="text-[var(--color-text-muted)]">+91 9867453627</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">
