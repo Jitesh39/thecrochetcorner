@@ -98,7 +98,7 @@ export default function ContactPage() {
               </div>
             </div>
 
-            <div className="mt-16 pt-16 border-t border-gray-100">
+            <div className="mt-8 pt-6 border-t border-gray-100">
               <h3 className="font-serif text-lg font-bold text-[var(--color-text-main)] mb-6 uppercase text-xs tracking-widest">Follow Our Journey</h3>
               <div className="flex gap-4">
                 <a href="#" className="p-3 bg-gray-50 text-[var(--color-text-muted)] rounded-2xl hover:bg-[var(--color-primary)] hover:text-white transition-all duration-300">
@@ -220,13 +220,6 @@ export default function ContactPage() {
               )}
             </AnimatePresence>
           </motion.div>
-        </div>
-      </section>
-
-      {/* Map Placeholder Section */}
-      <section className="h-[400px] w-full bg-gray-100 grayscale hover:grayscale-0 transition-all duration-700 overflow-hidden relative">
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
-          <p className="text-gray-400 font-serif italic text-xl">Interactive Map Coming Soon...</p>
         </div>
       </section>
     </div>

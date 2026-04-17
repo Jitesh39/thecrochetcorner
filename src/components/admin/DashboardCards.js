@@ -13,10 +13,11 @@ export default function DashboardCards({ stats }) {
     { label: "Total Orders", value: stats?.totalOrders || "0", icon: ShoppingBag, color: "bg-green-50 text-green-600", border: "border-green-100" },
     { label: "Pending Orders", value: stats?.pendingOrders || "0", icon: Clock, color: "bg-orange-50 text-orange-600", border: "border-orange-100" },
     { label: "Revenue", value: `₹${(stats?.revenue || 0).toLocaleString("en-IN")}`, icon: IndianRupee, color: "bg-purple-50 text-purple-600", border: "border-purple-100" },
+    { label: "Custom Orders", value: stats?.customOrders || "0", icon: ShoppingBag, color: "bg-pink-50 text-pink-600", border: "border-pink-100" },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
       {displayStats.map((card, index) => {
         const Icon = card.icon;
         return (

@@ -10,6 +10,7 @@ import {
   Package, 
   ShoppingBag, 
   Clock, 
+  Heart,
   Store,
   X,
   LogOut
@@ -19,6 +20,7 @@ const menuItems = [
   { name: "Dashboard", icon: LayoutDashboard, href: "/admin" },
   { name: "Manage Products", icon: Package, href: "/admin/products" },
   { name: "Orders", icon: ShoppingBag, href: "/admin/orders" },
+  { name: "Custom Orders", icon: Heart, href: "/admin/custom-orders" },
   { name: "Pending Orders", icon: Clock, href: "/admin/pending" },
   { name: "View Store", icon: Store, href: "/#" },
 ];
@@ -56,12 +58,7 @@ export default function MobileDrawer({ isOpen, setIsOpen }) {
         }`}
       >
         <div className="p-6 flex items-center justify-between border-b border-gray-50">
-          <Link href="/admin" className="flex items-center gap-2" onClick={() => setIsOpen(false)}>
-            <div className="w-8 h-8 bg-[var(--color-primary)] rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold">C</span>
-            </div>
-            <span className="font-serif text-xl font-bold text-[var(--color-text-main)]">Admin Menu</span>
-          </Link>
+          <span className="font-serif text-xl font-bold text-[var(--color-text-main)]">Admin Menu</span>
           <button 
             onClick={() => setIsOpen(false)}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"

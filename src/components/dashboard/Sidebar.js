@@ -40,17 +40,8 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="hidden lg:flex flex-col w-[240px] h-screen bg-white border-r border-gray-100 fixed left-0 top-0 z-40 transition-all duration-300 shadow-sm">
-      <div className="p-8">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-[var(--color-primary)] rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold">C</span>
-          </div>
-          <span className="font-serif text-xl font-bold text-[var(--color-text-main)]">My Corner</span>
-        </Link>
-      </div>
-
-      <nav className="flex-1 px-4 space-y-1">
+    <aside className="hidden lg:flex flex-col w-[240px] h-full bg-white border-r border-gray-100 transition-all duration-300 shadow-sm overflow-y-auto">
+      <nav className="flex-1 px-4 py-8 space-y-1">
         {menuItems.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href;

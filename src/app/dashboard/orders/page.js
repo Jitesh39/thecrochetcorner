@@ -11,14 +11,34 @@ export default function MyOrders() {
   const user = useAuthStore((state) => state.user);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!user) return;
     const fetchOrders = async () => {
       try {
+        // Fetch Regular Orders
         const q = query(collection(db, "orders"), where("userId", "==", user.uid), orderBy("createdAt", "desc"));
         const snap = await getDocs(q);
-        setOrders(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        const regularOrders = snap.docs.map(doc => ({ id: doc.id, ...doc.data(), isCustom: false }));
+
+        // Fetch Custom Orders
+        const cq = query(collection(db, "customOrders"), where("userId", "==", user.uid), orderBy("createdAt", "desc"));
+        const csnap = await getDocs(cq);
+        const customOrders = csnap.docs.map(doc => ({ id: doc.id, ...doc.data(), isCustom: true }));
+
+        // Combine and Sort
+        const allOrders = [...regularOrders, ...customOrders].sort((a, b) => {
+          const timeA = a.createdAt?.toMillis?.() || 0;
+          const timeB = b.createdAt?.toMillis?.() || 0;
+          return timeB - timeA;
+        });
+
+        setOrders(allOrders);
       } catch (err) {
         console.error(err);
       } finally {
@@ -43,6 +63,7 @@ export default function MyOrders() {
             <input
               type="text"
               placeholder="Search orders..."
+              suppressHydrationWarning
               className="w-full bg-gray-50 border border-transparent rounded-xl py-2 px-4 pl-10 text-sm outline-none focus:bg-white focus:border-[var(--color-primary)] transition-all"
             />
             <Search size={16} className="absolute left-3 top-2.5 text-gray-400" />
@@ -50,8 +71,12 @@ export default function MyOrders() {
 
           <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0">
             {["All", "Processing", "Shipped", "Delivered"].map((status) => (
-              <button key={status} className={`whitespace-nowrap px-4 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase transition-all ${status === "All" ? "bg-[var(--color-primary)] text-white shadow-md shadow-[var(--color-primary)]/20" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
-                }`}>
+              <button
+                key={status}
+                suppressHydrationWarning
+                className={`whitespace-nowrap px-4 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase transition-all ${status === "All" ? "bg-[var(--color-primary)] text-white shadow-md shadow-[var(--color-primary)]/20" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
+                  }`}
+              >
                 {status}
               </button>
             ))}
@@ -72,6 +97,7 @@ export default function MyOrders() {
               <thead className="bg-gray-50/50 text-[10px] uppercase tracking-widest font-bold text-gray-400">
                 <tr>
                   <th className="px-6 py-4">Order ID</th>
+                  <th className="px-6 py-4">Type</th>
                   <th className="px-6 py-4">Date</th>
                   <th className="px-6 py-4">Status</th>
                   <th className="px-6 py-4 text-right">Total</th>
@@ -86,16 +112,25 @@ export default function MyOrders() {
                         <ArrowUpRight size={14} className="text-gray-300 group-hover:text-[var(--color-primary)] transition-colors" />
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-gray-400 font-medium">
-                      {order.createdAt?.toDate ? order.createdAt.toDate().toLocaleDateString() : "Pending"}
-                    </td>
                     <td className="px-6 py-4">
-                      <span className={`px-2 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider ${order.status === "Delivered" ? "bg-green-50 text-green-600" : "bg-orange-50 text-orange-600"
-                        }`}>
-                        {order.status || "Processing"}
+                      <span className={`text-[10px] font-bold uppercase tracking-widest ${order.isCustom ? "text-pink-500" : "text-blue-500"}`}>
+                        {order.isCustom ? "Custom Order" : "Store Purchase"}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-right font-bold text-gray-800">₹{order.totalAmount}</td>
+                    <td className="px-6 py-4 text-gray-400 font-medium">
+                      {hasMounted && (order.createdAt?.toDate ? order.createdAt.toDate().toLocaleDateString() : "Pending")}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider ${order.status === "Delivered" || order.status === "Accepted" ? "bg-green-50 text-green-600" :
+                          order.status === "Hold" ? "bg-orange-50 text-orange-600" :
+                            "bg-blue-50 text-blue-600"
+                        }`}>
+                        {order.status || (order.isCustom ? "Pending" : "Processing")}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right font-bold text-gray-800">
+                      ₹{order.isCustom ? (order.price || 0) : order.totalAmount}
+                    </td>
                   </tr>
                 ))}
               </tbody>

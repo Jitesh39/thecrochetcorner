@@ -1,8 +1,7 @@
 import { Nunito, Playfair_Display } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import AuthInitializer from "@/components/AuthInitializer";
+import LayoutWrapper from "@/components/LayoutWrapper";
 
 const nunito = Nunito({
   variable: "--font-nunito",
@@ -24,11 +23,9 @@ export default function RootLayout({ children }) {
     <html lang="en" suppressHydrationWarning>
       <body className={`${nunito.variable} ${playfair.variable} antialiased min-h-screen flex flex-col`}>
         <AuthInitializer />
-        <Navbar />
-        <main className="flex-grow pt-24 pb-12">
+        <LayoutWrapper>
           {children}
-        </main>
-        <Footer />
+        </LayoutWrapper>
       </body>
     </html>
   );

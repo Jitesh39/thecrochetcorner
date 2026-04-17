@@ -12,7 +12,8 @@ export default function AdminPage() {
     totalProducts: 0,
     totalOrders: 0,
     pendingOrders: 0,
-    revenue: 0
+    revenue: 0,
+    customOrders: 0
   });
   const [recentOrders, setRecentOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -46,9 +47,14 @@ export default function AdminPage() {
       setLoading(false);
     });
 
+    const unsubCustom = onSnapshot(collection(db, "customOrders"), (snapshot) => {
+      setStats(prev => ({ ...prev, customOrders: snapshot.size }));
+    });
+
     return () => {
       unsubProducts();
       unsubOrders();
+      unsubCustom();
     };
   }, []);
 

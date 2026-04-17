@@ -24,9 +24,7 @@ export default function Footer() {
               Handcrafted crochet gifts, elegant bouquets, and cozy accessories made with love and attention to detail. Every piece tells a unique story.
             </p>
             <div className="flex space-x-4 text-[var(--color-text-muted)]">
-              <a href="#" className="hover:text-[var(--color-primary)] transition-colors"><Instagram size={20} /></a>
-              <a href="#" className="hover:text-[var(--color-primary)] transition-colors"><Facebook size={20} /></a>
-              <a href="#" className="hover:text-[var(--color-primary)] transition-colors"><Twitter size={20} /></a>
+              <a href="https://www.instagram.com/" className="hover:text-[var(--color-primary)] transition-colors"><Instagram size={20} /></a>
               <a href="#" className="hover:text-[var(--color-primary)] transition-colors"><Mail size={20} /></a>
             </div>
           </div>

@@ -34,10 +34,10 @@ export default function Home() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/shop" className="btn-primary">
-              Shop Collection
+              View Collection
             </Link>
             <Link href="/custom" className="btn-secondary">
-              Crochet Studio
+              Custom Order
             </Link>
           </div>
         </div>

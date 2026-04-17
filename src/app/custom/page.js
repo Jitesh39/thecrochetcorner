@@ -3,8 +3,11 @@
 import { useState } from "react";
 import { ChevronRight, Check, Send } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/authStore";
 
 export default function CrochetStudio() {
+  const router = useRouter();
   const [step, setStep] = useState(1);
   const [status, setStatus] = useState("idle"); // idle, loading, success, error
   const [formData, setFormData] = useState({
@@ -35,37 +38,50 @@ export default function CrochetStudio() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Check if user is logged in
+    const user = useAuthStore.getState().user;
+    if (!user) {
+      alert("Please login to continue");
+      router.push("/login");
+      return;
+    }
+
     if (!formData.name || !formData.email) {
       alert("Please fill in required fields (Name and Email)");
       return;
     }
-
+    
     setStatus("loading");
-
+    
     try {
-      const response = await fetch("https://formspree.io/f/mzdyelqb", {
-        method: "POST",
-        body: JSON.stringify(formData),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        }
+      const { db } = await import("@/lib/firebase");
+      const { collection, addDoc, serverTimestamp } = await import("firebase/firestore");
+
+      await addDoc(collection(db, "customOrders"), {
+        userId: user.uid,
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone || "",
+        requirement: formData.message || "",
+        type: formData.type || "Custom",
+        color: formData.color || "Default",
+        size: formData.size || "Standard",
+        status: "Pending",
+        price: 0,
+        createdAt: serverTimestamp()
       });
 
-      if (response.ok) {
-        setStatus("success");
-        setFormData({
-          type: "",
-          color: "",
-          size: "",
-          message: "",
-          name: "",
-          email: "",
-          phone: "",
-        });
-      } else {
-        setStatus("error");
-      }
+      setStatus("success");
+      setFormData({
+        type: "",
+        color: "",
+        size: "",
+        message: "",
+        name: "",
+        email: "",
+        phone: "",
+      });
     } catch (error) {
       console.error("Submission error:", error);
       setStatus("error");

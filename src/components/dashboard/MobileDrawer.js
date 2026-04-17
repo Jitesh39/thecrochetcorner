@@ -4,12 +4,12 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
-import { 
-  LayoutDashboard, 
-  ShoppingBag, 
-  Heart, 
-  User, 
-  MapPin, 
+import {
+  LayoutDashboard,
+  ShoppingBag,
+  Heart,
+  User,
+  MapPin,
   Settings,
   LogOut,
   X
@@ -42,26 +42,19 @@ export default function MobileDrawer({ isOpen, setIsOpen }) {
 
   return (
     <>
-      <div 
-        className={`fixed inset-0 bg-black/40 backdrop-blur-sm z-[60] transition-opacity duration-300 lg:hidden ${
-          isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
+      <div
+        className={`fixed inset-0 bg-black/40 backdrop-blur-sm z-[60] transition-opacity duration-300 lg:hidden ${isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+          }`}
         onClick={() => setIsOpen(false)}
       />
 
-      <aside 
-        className={`fixed top-0 left-0 w-[280px] h-full bg-white z-[70] shadow-2xl transition-transform duration-300 ease-in-out lg:hidden ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+      <aside
+        className={`fixed top-0 left-0 w-[280px] h-full bg-white z-[70] shadow-2xl transition-transform duration-300 ease-in-out lg:hidden ${isOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         <div className="p-6 flex items-center justify-between border-b border-gray-50">
-          <Link href="/dashboard" className="flex items-center gap-2" onClick={() => setIsOpen(false)}>
-            <div className="w-8 h-8 bg-[var(--color-primary)] rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold">C</span>
-            </div>
-            <span className="font-serif text-xl font-bold text-[var(--color-text-main)]">My Corner</span>
-          </Link>
-          <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-gray-100 rounded-lg">
+          <span className="font-serif text-xl font-bold text-[var(--color-text-main)]">Menu</span>
+          <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
             <X size={20} className="text-gray-500" />
           </button>
         </div>
@@ -70,17 +63,16 @@ export default function MobileDrawer({ isOpen, setIsOpen }) {
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
-            
+
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 onClick={() => setIsOpen(false)}
-                className={`flex items-center gap-3 px-4 py-4 rounded-2xl text-base font-medium transition-all duration-300 ${
-                  isActive 
-                    ? "bg-[var(--color-secondary)] text-[var(--color-primary)] shadow-sm border border-[var(--color-primary)]/10" 
+                className={`flex items-center gap-3 px-4 py-4 rounded-2xl text-base font-medium transition-all duration-300 ${isActive
+                    ? "bg-[var(--color-secondary)] text-[var(--color-primary)] shadow-sm border border-[var(--color-primary)]/10"
                     : "text-gray-600 hover:bg-gray-50"
-                }`}
+                  }`}
               >
                 <Icon size={22} />
                 {item.name}
@@ -90,9 +82,9 @@ export default function MobileDrawer({ isOpen, setIsOpen }) {
         </nav>
 
         <div className="absolute bottom-0 left-0 w-full p-6 border-t border-gray-50">
-          <button 
-             onClick={handleLogout}
-             className="w-full py-4 rounded-xl border border-red-100 text-red-500 font-bold hover:bg-red-50 transition-all flex items-center justify-center gap-2"
+          <button
+            onClick={handleLogout}
+            className="w-full py-4 rounded-xl border border-red-100 text-red-500 font-bold hover:bg-red-50 transition-all flex items-center justify-center gap-2"
           >
             <LogOut size={18} />
             Sign Out
