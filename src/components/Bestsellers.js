@@ -7,6 +7,7 @@ import { Star, ShoppingBag } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
 import { db } from "@/lib/firebase";
 import { collection, onSnapshot, limit, query } from "firebase/firestore";
+import { motion } from "framer-motion";
 
 export default function Bestsellers() {
   const [products, setProducts] = useState([]);
@@ -31,7 +32,7 @@ export default function Bestsellers() {
     <section className="py-24 bg-[#f5f1ed]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-10">
           <h2 className="text-4xl md:text-5xl font-serif text-[var(--color-text-main)] mb-4">
             Bestselling Products
           </h2>
@@ -39,14 +40,14 @@ export default function Bestsellers() {
         </div>
 
         {/* Product Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
           {loading ? (
             <div className="col-span-full py-20 text-center font-bold text-gray-400">Syncing latest products...</div>
           ) : products.map((product) => (
             <Link
               key={product.id}
               href={`/product/${product.id}`}
-              className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden flex flex-col h-full cursor-pointer"
+              className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden flex flex-col h-full cursor-pointer max-w-md mx-auto w-full relative"
             >
               {/* Product Image Area */}
               <div className="relative aspect-square w-full bg-gray-50 flex items-center justify-center overflow-hidden">
@@ -66,28 +67,28 @@ export default function Bestsellers() {
               </div>
 
               {/* Product Info */}
-              <div className="p-5 flex flex-col flex-grow">
-                <div className="flex justify-between items-start mb-1">
-                  <h3 className="text-lg font-serif text-[var(--color-text-main)] leading-snug pr-4 group-hover:text-[var(--color-primary)] transition-colors line-clamp-2">
+              <div className="p-6 flex flex-col flex-grow">
+                <div className="flex justify-between items-start mb-2 gap-2">
+                  <h3 className="text-lg md:text-xl font-serif text-[var(--color-text-main)] leading-snug group-hover:text-[var(--color-primary)] transition-colors line-clamp-2">
                     {product.name}
                   </h3>
-                  <p className="text-lg font-medium text-[var(--color-primary)] whitespace-nowrap">
+                  <p className="text-lg md:text-xl font-medium text-[var(--color-primary)] whitespace-nowrap">
                     ₹{product.price.toLocaleString("en-IN")}
                   </p>
                 </div>
 
-                <div className="flex items-center gap-1 mb-3">
+                <div className="flex items-center gap-1 mb-4">
                   <div className="flex text-yellow-400">
                     {[...Array(5)].map((_, i) => (
                       <Star
                         key={i}
-                        size={14}
+                        size={16}
                         fill={i < 5 ? "currentColor" : "none"}
                         className={i < 5 ? "" : "text-gray-200"}
                       />
                     ))}
                   </div>
-                  <span className="text-[10px] text-gray-400 font-medium ml-1">(Handmade)</span>
+                  <span className="text-xs text-gray-400 font-medium ml-1">(Handmade)</span>
                 </div>
 
                 <button
@@ -96,15 +97,18 @@ export default function Bestsellers() {
                     e.stopPropagation();
                     addItem(product);
                   }}
-                  className="mt-auto w-full flex items-center justify-center gap-2 border border-gray-200 py-2.5 rounded-full text-sm text-[var(--color-text-main)] font-medium transition-all duration-300 hover:bg-[var(--color-primary)] hover:text-white hover:border-[var(--color-primary)] shadow-sm relative z-10"
+                  className="mt-auto w-full flex items-center justify-center gap-2 border border-gray-200 py-3 rounded-full text-sm text-[var(--color-text-main)] font-bold transition-all duration-300 hover:bg-[var(--color-primary)] hover:text-white hover:border-[var(--color-primary)] shadow-md relative z-10"
                 >
-                  <ShoppingBag size={16} strokeWidth={1.5} />
+                  <ShoppingBag size={18} strokeWidth={2} />
                   <span>Add to Cart</span>
                 </button>
               </div>
             </Link>
           ))}
         </div>
+
+
+
       </div>
     </section>
   );

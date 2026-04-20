@@ -6,8 +6,11 @@ import { useParams, useRouter } from "next/navigation";
 import { doc, getDoc, collection, query, where, limit, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useCartStore } from "@/store/cartStore";
+import { useAuthStore } from "@/store/authStore";
+import { useWishlistStore } from "@/store/wishlistStore";
 import { Minus, Plus, Heart, Share2, ChevronRight, Star, ShieldCheck, Truck } from "lucide-react";
 import Link from "next/link";
+import toast from "react-hot-toast";
 
 export default function ProductDetailPage() {
   const { id } = useParams();
@@ -18,6 +21,8 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
   const addItem = useCartStore((state) => state.addItem);
+  const user = useAuthStore((state) => state.user);
+  const { toggleItem, isInWishlist } = useWishlistStore();
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -79,7 +84,43 @@ export default function ProductDetailPage() {
 
   const handleAddToCart = () => {
     addItem(product, quantity);
-    router.push("/cart");
+    toast.success("Added to cart!");
+  };
+
+  const handleWishlist = () => {
+    if (!user) {
+      toast.error("Please Sign In to Use Wishlist", {
+        icon: '🔒',
+        duration: 4000
+      });
+      return;
+    }
+    
+    const added = toggleItem(product);
+    if (added) {
+      toast.success("Added to wishlist!", { icon: '❤️' });
+    } else {
+      toast.success("Removed from wishlist");
+    }
+  };
+
+  const handleShare = async () => {
+    const shareData = {
+      title: product.name,
+      text: `Check out this amazing handmade ${product.name} at The Crochet Corner!`,
+      url: window.location.href,
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success("Link copied to clipboard!", { icon: '🔗' });
+      }
+    } catch (err) {
+      console.error("Error sharing:", err);
+    }
   };
 
   return (
@@ -175,18 +216,29 @@ export default function ProductDetailPage() {
             <div className="space-y-6 mt-auto">
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex items-center justify-between border border-gray-100 rounded-2xl bg-gray-50 p-2 w-full sm:w-min min-w-[140px]">
-                  <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="p-3 text-gray-400 hover:text-[var(--color-primary)] rounded-xl hover:bg-white active:scale-90"><Minus size={18} /></button>
+                  <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="p-3 text-gray-400 hover:text-[var(--color-primary)] rounded-xl hover:bg-white active:scale-90 transition-all cursor-pointer"><Minus size={18} /></button>
                   <span className="w-10 text-center font-bold text-gray-900">{quantity}</span>
-                  <button onClick={() => setQuantity(quantity + 1)} className="p-3 text-gray-400 hover:text-[var(--color-primary)] rounded-xl hover:bg-white active:scale-90"><Plus size={18} /></button>
+                  <button onClick={() => setQuantity(quantity + 1)} className="p-3 text-gray-400 hover:text-[var(--color-primary)] rounded-xl hover:bg-white active:scale-90 transition-all cursor-pointer"><Plus size={18} /></button>
                 </div>
 
-                <button onClick={handleAddToCart} className="flex-1 py-4 px-8 rounded-2xl bg-[var(--color-primary)] text-white font-bold shadow-lg shadow-[var(--color-primary)]/20 hover:scale-[1.02] active:scale-95 transition-all text-lg">Add to Cart</button>
+                <button onClick={handleAddToCart} className="flex-1 py-4 px-8 rounded-2xl bg-[var(--color-primary)] text-white font-bold shadow-lg shadow-[var(--color-primary)]/20 hover:scale-[1.02] active:scale-95 transition-all text-lg cursor-pointer">Add to Cart</button>
               </div>
 
               <div className="flex items-center justify-between pt-6 border-t border-gray-50">
                 <div className="flex gap-4">
-                  <button className="flex items-center gap-2 text-xs font-bold text-gray-400 hover:text-[var(--color-primary)] transition-all"><Heart size={16} /> WISH LIST</button>
-                  <button className="flex items-center gap-2 text-xs font-bold text-gray-400 hover:text-[var(--color-primary)] transition-all"><Share2 size={16} /> SHARE</button>
+                  <button 
+                    onClick={handleWishlist}
+                    className={`flex items-center gap-2 text-xs font-bold transition-all cursor-pointer ${isInWishlist(product?.id) ? "text-[var(--color-primary)]" : "text-gray-400 hover:text-[var(--color-primary)]"}`}
+                  >
+                    <Heart size={16} fill={isInWishlist(product?.id) ? "currentColor" : "none"} strokeWidth={isInWishlist(product?.id) ? 0 : 2} /> 
+                    WISH LIST
+                  </button>
+                  <button 
+                    onClick={handleShare}
+                    className="flex items-center gap-2 text-xs font-bold text-gray-400 hover:text-[var(--color-primary)] transition-all cursor-pointer"
+                  >
+                    <Share2 size={16} /> SHARE
+                  </button>
                 </div>
                 <p className="text-[10px] text-gray-300 font-bold uppercase tracking-widest">SKU: CR-{product.id.slice(0, 4).toUpperCase()}</p>
               </div>

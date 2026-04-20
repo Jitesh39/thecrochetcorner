@@ -3,15 +3,19 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Star, ShoppingCart } from "lucide-react";
+import { Star, ShoppingCart, Heart } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
+import { useWishlistStore } from "@/store/wishlistStore";
 import { db } from "@/lib/firebase";
 import { collection, onSnapshot } from "firebase/firestore";
+import toast from "react-hot-toast";
+import { motion } from "framer-motion";
 
 export default function CategorySections() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const addItem = useCartStore((state) => state.addItem);
+  const { toggleItem, isInWishlist } = useWishlistStore();
 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "products"), (snapshot) => {
@@ -25,6 +29,17 @@ export default function CategorySections() {
 
     return () => unsub();
   }, []);
+
+  const handleToggleWishlist = (e, product) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const added = toggleItem(product);
+    if (added) {
+      toast.success("Added to wishlist!", { icon: '❤️' });
+    } else {
+      toast.success("Removed from wishlist");
+    }
+  };
 
   // Group products by category
   const categoriesList = [
@@ -54,13 +69,13 @@ export default function CategorySections() {
         </div>
 
         {/* Categories Sections */}
-        <div className="space-y-32">
+        <div className="space-y-12">
           {loading ? (
             <div className="py-20 text-center font-bold text-gray-400">Loading shop categories...</div>
           ) : categories.map((cat, idx) => (
             <div key={idx} className="animate-slide-up">
               {/* Section Header */}
-              <div className="flex justify-between items-end mb-12 border-b border-gray-100 pb-8 px-4 sm:px-0">
+              <div className="flex justify-between items-end mb-3 border-b border-gray-100 pb-2 px-4 sm:px-0">
                 <h3 className="text-3xl md:text-4xl font-serif font-bold text-[var(--color-text-main)] transition-colors hover:text-[var(--color-primary)] cursor-default">
                   {cat.title}
                 </h3>
@@ -78,7 +93,7 @@ export default function CategorySections() {
                   <Link
                     key={product.id}
                     href={`/product/${product.id}`}
-                    className="min-w-[75%] sm:min-w-[45%] lg:min-w-0 snap-start flex-shrink-0 lg:flex-shrink group bg-[#f5f1ed]/50 hover:bg-white rounded-[1.5rem] p-4 transition-all duration-500 shadow-sm hover:shadow-2xl border border-transparent hover:border-gray-50 flex flex-col h-full transform hover:-translate-y-2 cursor-pointer"
+                    className="min-w-[75%] sm:min-w-[45%] lg:min-w-0 snap-start flex-shrink-0 lg:flex-shrink group bg-[#f5f1ed]/50 hover:bg-white rounded-[1.5rem] p-4 transition-all duration-500 shadow-sm hover:shadow-2xl border border-transparent hover:border-gray-50 flex flex-col h-full transform hover:-translate-y-2 cursor-pointer relative"
                   >
                     {/* Image Area */}
                     <div className="relative aspect-square w-full rounded-xl overflow-hidden mb-4 bg-gray-50 flex items-center justify-center group-hover:bg-[#fcfbf9] transition-colors">

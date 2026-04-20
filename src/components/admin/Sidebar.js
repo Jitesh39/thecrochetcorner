@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
+import toast from "react-hot-toast";
 import {
   LayoutDashboard,
   Package,
@@ -13,7 +14,8 @@ import {
   Store,
   X,
   LogOut,
-  Bell
+  Bell,
+  Settings as SettingsIcon
 } from "lucide-react";
 
 const menuItems = [
@@ -23,6 +25,7 @@ const menuItems = [
   { name: "Custom Orders", icon: Heart, href: "/admin/custom-orders" },
   { name: "Notifications", icon: Bell, href: "/admin/notifications" },
   { name: "Pending Orders", icon: Clock, href: "/admin/pending" },
+  { name: "Settings", icon: SettingsIcon, href: "/admin/settings" },
   { name: "View Store", icon: Store, href: "/#" },
 ];
 
@@ -32,12 +35,13 @@ export default function Sidebar({ isOpen, setIsOpen }) {
 
   const handleLogout = async () => {
     try {
-      if (window.confirm("Are you sure you want to log out?")) {
-        await signOut(auth);
-        router.push("/login");
-      }
+      await signOut(auth);
+      localStorage.clear();
+      toast.success("Logged out successfully");
+      router.push("/login");
     } catch (error) {
-      console.error("Error signing out: ", error);
+      console.error("Logout error: ", error);
+      toast.error("Failed to log out");
     }
   };
 

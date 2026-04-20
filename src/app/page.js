@@ -1,45 +1,150 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import ProductCard from "@/components/ProductCard";
+import { motion, AnimatePresence } from "framer-motion";
+import { db } from "@/lib/firebase";
+import { doc, onSnapshot } from "firebase/firestore";
 import Bestsellers from "@/components/Bestsellers";
 import OurPromise from "@/components/OurPromise";
 import CategorySections from "@/components/CategorySections";
 import StudioPromotion from "@/components/StudioPromotion";
 
-export default function Home() {
+const defaultImages = [
+  "https://images.unsplash.com/photo-1615598696883-7be1a224fe81?q=80&w=1600&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?q=80&w=1600&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1605338661642-cc019ba2f9ec?q=80&w=1600&auto=format&fit=crop"
+];
 
+const defaultTypingLines = [
+  "Crafted with Love, Made to Last",
+  "Every Thread, A Story",
+  "Handmade with Heart",
+  "Where Threads Turn into Memories"
+];
 
+function Typewriter({ texts }) {
+  const [index, setIndex] = useState(0);
+  const [subIndex, setSubIndex] = useState(0);
+  const [reverse, setReverse] = useState(false);
 
+  useEffect(() => {
+    if (subIndex === texts[index].length + 1 && !reverse) {
+      setTimeout(() => setReverse(true), 2000);
+      return;
+    }
+
+    if (subIndex === 0 && reverse) {
+      setReverse(false);
+      setIndex((prev) => (prev + 1) % texts.length);
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      setSubIndex((prev) => prev + (reverse ? -1 : 1));
+    }, reverse ? 75 : 150);
+
+    return () => clearTimeout(timeout);
+  }, [subIndex, index, reverse, texts]);
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <span className="inline-block min-h-[1.5em]">
+      {texts[index].substring(0, subIndex)}
+      <span className="animate-pulse border-r-2 border-[var(--color-primary)] ml-1"></span>
+    </span>
+  );
+}
+
+export default function Home() {
+  const [images, setImages] = useState(defaultImages);
+  const [typingLines, setTypingLines] = useState(defaultTypingLines);
+  const [currentImage, setCurrentImage] = useState(0);
+
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, "settings", "hero"), (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data.images && data.images.length > 0) setImages(data.images);
+        if (data.typingLines && data.typingLines.length > 0) setTypingLines(data.typingLines);
+      }
+    });
+
+    return () => unsub();
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImage((prev) => (prev + 1) % images.length);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, [images.length]);
+
+  return (
+    <div className="flex flex-col min-h-screen overflow-x-hidden">
       {/* Hero Section */}
-      <section className="relative h-[85vh] flex items-center justify-center bg-[var(--color-secondary)] overflow-hidden">
-        <div className="absolute inset-0 opacity-40">
-          <Image
-            src="https://images.unsplash.com/photo-1615598696883-7be1a224fe81?q=80&w=1600&auto=format&fit=crop"
-            alt="Crochet background"
-            fill
-            className="object-cover object-center"
-            priority
-          />
-        </div>
-        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto flex flex-col items-center">
-          <span className="text-sm md:text-base tracking-[0.2em] font-medium text-[var(--color-primary-dark)] uppercase mb-4 block">Handmade With Love</span>
-          <h1 className="text-5xl md:text-7xl font-serif font-medium text-[var(--color-text-main)] mb-6 leading-tight">
+      <section className="relative h-[70vh] md:h-[85vh] flex items-center justify-center bg-gray-900 overflow-hidden">
+        {/* Background Slider */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentImage}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.5 }}
+            className="absolute inset-0"
+          >
+            <Image
+              src={images[currentImage]}
+              alt="Crochet background"
+              fill
+              className="object-cover object-center"
+              priority
+            />
+            {/* Dark Overlay */}
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px]"></div>
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Content */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.5 }}
+          className="relative z-10 text-center px-6 max-w-2xl mx-auto flex flex-col items-center"
+        >
+          <h1 className="text-4xl md:text-7xl font-serif font-bold text-white mb-6 leading-tight drop-shadow-lg">
             Cozy Crochet Creations
           </h1>
-          <p className="text-lg md:text-xl text-[var(--color-text-muted)] mb-10 max-w-2xl mx-auto leading-relaxed">
-            Discover our premium collection of handmade flowers, bouquets, and personalized gifts crafted to bring warmth and joy.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/shop" className="btn-primary">
-              View Collection
+          <div className="text-lg md:text-2xl text-white/90 mb-10 font-medium h-[3em] flex items-center justify-center">
+            <Typewriter texts={typingLines} />
+          </div>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center w-full sm:w-auto px-10 sm:px-0">
+            <Link
+              href="/shop"
+              className="w-full sm:w-auto px-8 py-4 bg-[var(--color-primary)] text-white rounded-full font-bold shadow-xl shadow-[var(--color-primary)]/20 hover:scale-105 active:scale-95 transition-all text-center whitespace-nowrap cursor-pointer"
+            >
+              Shop Now
             </Link>
-            <Link href="/custom" className="btn-secondary">
+            <Link
+              href="/custom"
+              className="w-full sm:w-auto px-8 py-4 bg-white/10 backdrop-blur-md border-2 border-white/30 text-white rounded-full font-bold hover:bg-white hover:text-gray-900 transition-all text-center whitespace-nowrap cursor-pointer shadow-lg"
+            >
               Custom Order
             </Link>
           </div>
+        </motion.div>
+
+        {/* Slider Indicators */}
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex gap-3 z-10">
+          {images.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setCurrentImage(idx)}
+              className={`h-1.5 rounded-full transition-all duration-500 ${currentImage === idx ? "w-8 bg-white" : "w-2 bg-white/30 hover:bg-white/50"
+                }`}
+            />
+          ))}
         </div>
       </section>
 
@@ -55,43 +160,53 @@ export default function Home() {
       {/* Our Promise Section */}
       <OurPromise />
 
-
-
-
-
       {/* Testimonials Section */}
-      <section className="py-20 bg-[var(--color-secondary)]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-serif text-[var(--color-text-main)] mb-4">Happy Customers</h2>
-            <p className="text-[var(--color-text-muted)] italic">"What they say about our handmade creations"</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center sm:text-left">
-            {[
-              { name: "Ananya Sharma", text: "The rose bouquet I ordered was absolutely stunning! It's so well-made and looks exactly like the pictures.", role: "Regular Customer" },
-              { name: "Rishabh Malhotra", text: "Got a custom amigurumi for my niece. The quality is top-notch and it's so soft. Best gift ever!", role: "Gift Buyer" },
-              { name: "Priya Singh", text: "I love my new crochet beanie. It's cozy, fits perfectly, and the color is exactly what I wanted.", role: "Verified Buyer" }
-            ].map((testimonial, i) => (
-              <div key={i} className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col items-center sm:items-start transition-all duration-300 hover:shadow-md">
-                <div className="flex gap-1 mb-6 text-[var(--color-primary)]">
-                  {[...Array(5)].map((_, star) => (
-                    <svg key={star} className="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                  ))}
-                </div>
-                <p className="text-[var(--color-text-main)] italic mb-8 leading-relaxed">"{testimonial.text}"</p>
-                <div>
-                  <h4 className="font-serif font-bold text-[var(--color-text-main)]">{testimonial.name}</h4>
-                  <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-widest mt-1">{testimonial.role}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-
-
+      <TestimonialsSection />
     </div>
+  );
+}
+
+function TestimonialsSection() {
+  const [entries, setEntries] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, "settings", "testimonials"), (docSnap) => {
+      if (docSnap.exists()) {
+        setEntries(docSnap.data().entries || []);
+      }
+      setLoading(false);
+    });
+    return () => unsub();
+  }, []);
+
+  if (loading || entries.length === 0) return null;
+
+  return (
+    <section className="py-24 bg-[var(--color-secondary)]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-5xl font-serif text-[var(--color-text-main)] mb-4 font-bold">Happy Customers</h2>
+          <p className="text-[var(--color-text-muted)] italic">"What they say about our handmade creations"</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {entries.map((testimonial, i) => (
+            <div key={i} className="bg-white p-10 rounded-[2.5rem] shadow-sm border border-gray-100 flex flex-col transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+              <div className="flex gap-1 mb-8 text-yellow-400">
+                {[...Array(testimonial.rating || 5)].map((_, star) => (
+                  <svg key={star} className="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                ))}
+              </div>
+              <p className="text-[var(--color-text-main)] italic mb-10 leading-relaxed font-medium">"{testimonial.text}"</p>
+              <div className="mt-auto">
+                <h4 className="font-serif font-bold text-[var(--color-text-main)] text-xl">{testimonial.name}</h4>
+                <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-[0.2em] mt-2 font-bold">{testimonial.product}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }

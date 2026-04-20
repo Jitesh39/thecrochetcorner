@@ -27,6 +27,26 @@
     font-family: var(--font-serif);
     font-weight: 500;
   }
+
+  /* Global Cursor Behavior */
+  button, 
+  a,
+  input[type="button"],
+  input[type="submit"],
+  [role="button"] {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  input:disabled,
+  [aria-disabled="true"],
+  .cursor-not-allowed {
+    cursor: not-allowed;
+  }
+
+  label {
+    cursor: pointer;
+  }
 }
 
 @layer components {

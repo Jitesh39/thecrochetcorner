@@ -1,11 +1,29 @@
-"use client";
-
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Instagram, Facebook, Twitter, Mail, Heart } from "lucide-react";
+import { db } from "@/lib/firebase";
+import { doc, onSnapshot } from "firebase/firestore";
 
 export default function Footer() {
   const pathname = usePathname();
+  const [contact, setContact] = useState({
+    email: "hello@thecrochetcorner.com",
+    instagram: "https://www.instagram.com/"
+  });
+
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, "settings", "contact"), (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setContact({
+          email: data.email || "hello@thecrochetcorner.com",
+          instagram: data.instagram || "https://www.instagram.com/"
+        });
+      }
+    });
+    return () => unsub();
+  }, []);
 
   // Do not render footer on dashboard
   if (pathname.startsWith("/dashboard")) {
@@ -24,8 +42,8 @@ export default function Footer() {
               Handcrafted crochet gifts, elegant bouquets, and cozy accessories made with love and attention to detail. Every piece tells a unique story.
             </p>
             <div className="flex space-x-4 text-[var(--color-text-muted)]">
-              <a href="https://www.instagram.com/" className="hover:text-[var(--color-primary)] transition-colors"><Instagram size={20} /></a>
-              <a href="#" className="hover:text-[var(--color-primary)] transition-colors"><Mail size={20} /></a>
+              <a href={contact.instagram.startsWith('http') ? contact.instagram : `https://instagram.com/${contact.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="hover:text-[var(--color-primary)] transition-colors"><Instagram size={20} /></a>
+              <a href={`mailto:${contact.email}`} className="hover:text-[var(--color-primary)] transition-colors"><Mail size={20} /></a>
             </div>
           </div>
 

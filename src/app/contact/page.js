@@ -1,11 +1,30 @@
 "use client";
 
-import { useState } from "react";
-import { Mail, Phone, MapPin, Instagram, Facebook, Twitter, Send, CheckCircle2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Mail, Phone, MapPin, Instagram, Facebook, Twitter, Send, CheckCircle2, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { db } from "@/lib/firebase";
+import { doc, onSnapshot } from "firebase/firestore";
 
 export default function ContactPage() {
   const [status, setStatus] = useState(null); // 'idle', 'loading', 'success', 'error'
+  const [contactInfo, setContactInfo] = useState({
+    email: "thecrochetcorner@gmail.com",
+    phone: "+91 9867453627",
+    address: "Uttarpradesh, India",
+    instagram: "thecrochetcorner"
+  });
+  const [infoLoading, setInfoLoading] = useState(true);
+
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, "settings", "contact"), (docSnap) => {
+      if (docSnap.exists()) {
+        setContactInfo(docSnap.data());
+      }
+      setInfoLoading(false);
+    });
+    return () => unsub();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -75,7 +94,7 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h3 className="font-serif text-lg font-bold text-[var(--color-text-main)] mb-1 uppercase text-xs tracking-widest">Email</h3>
-                  <p className="text-[var(--color-text-muted)]">thecrochetcorner@gmail.com</p>
+                  {infoLoading ? <div className="h-4 w-48 bg-gray-100 animate-pulse rounded"></div> : <p className="text-[var(--color-text-muted)]">{contactInfo.email}</p>}
                 </div>
               </div>
               <div className="flex items-start gap-4">
@@ -84,7 +103,7 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h3 className="font-serif text-lg font-bold text-[var(--color-text-main)] mb-1 uppercase text-xs tracking-widest">Phone</h3>
-                  <p className="text-[var(--color-text-muted)]">+91 9867453627</p>
+                  {infoLoading ? <div className="h-4 w-32 bg-gray-100 animate-pulse rounded"></div> : <p className="text-[var(--color-text-muted)]">{contactInfo.phone}</p>}
                 </div>
               </div>
               <div className="flex items-start gap-4">
@@ -93,15 +112,20 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h3 className="font-serif text-lg font-bold text-[var(--color-text-main)] mb-1 uppercase text-xs tracking-widest">Location</h3>
-                  <p className="text-[var(--color-text-muted)]">Uttarpradesh , India</p>
+                  {infoLoading ? <div className="h-12 w-48 bg-gray-100 animate-pulse rounded"></div> : <p className="text-[var(--color-text-muted)] whitespace-pre-wrap">{contactInfo.address}</p>}
                 </div>
               </div>
             </div>
 
             <div className="mt-8 pt-6 border-t border-gray-100">
-              <h3 className="font-serif text-lg font-bold text-[var(--color-text-main)] mb-6 uppercase text-xs tracking-widest">Follow Our Journey</h3>
+              <h3 className="font-serif text-lg font-bold text-[var(--color-text-main)] mb-6 uppercase text-xs tracking-widest">Connect With Us</h3>
               <div className="flex gap-4">
-                <a href="#" className="p-3 bg-gray-50 text-[var(--color-text-muted)] rounded-2xl hover:bg-[var(--color-primary)] hover:text-white transition-all duration-300">
+                <a
+                  href={contactInfo.instagram?.startsWith('http') ? contactInfo.instagram : `https://instagram.com/${contactInfo.instagram?.replace('@', '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-3 bg-gray-50 text-[var(--color-text-muted)] rounded-2xl hover:bg-[var(--color-primary)] hover:text-white transition-all duration-300"
+                >
                   <Instagram size={22} />
                 </a>
                 <a href="#" className="p-3 bg-gray-50 text-[var(--color-text-muted)] rounded-2xl hover:bg-[var(--color-primary)] hover:text-white transition-all duration-300">
@@ -161,7 +185,7 @@ export default function ContactPage() {
                         type="text"
                         id="name"
                         name="name"
-                        placeholder="Jane Doe"
+                        placeholder="Your Name"
                         className="w-full border-b border-gray-200 py-3 focus:border-[var(--color-primary)] outline-none bg-transparent transition-all"
                       />
                     </div>
@@ -172,7 +196,7 @@ export default function ContactPage() {
                         type="email"
                         id="email"
                         name="email"
-                        placeholder="jane@example.com"
+                        placeholder="you@gmail.com"
                         className="w-full border-b border-gray-200 py-3 focus:border-[var(--color-primary)] outline-none bg-transparent transition-all"
                       />
                     </div>
@@ -186,7 +210,7 @@ export default function ContactPage() {
                       className="w-full border-b border-gray-200 py-3 focus:border-[var(--color-primary)] outline-none bg-transparent transition-all"
                     >
                       <option value="General Inquiry">General Inquiry</option>
-                      <option value="Custom Commission">Custom Commission</option>
+                      <option value="Custom Order">Custom Order</option>
                       <option value="Order Support">Order Support</option>
                       <option value="Feedback">Feedback</option>
                     </select>

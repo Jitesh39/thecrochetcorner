@@ -5,19 +5,29 @@ export const useCartStore = create(
   persist(
     (set, get) => ({
       items: [],
+      isDrawerOpen: false,
+      
+      openDrawer: () => set({ isDrawerOpen: true }),
+      closeDrawer: () => set({ isDrawerOpen: false }),
+      toggleDrawer: () => set((state) => ({ isDrawerOpen: !state.isDrawerOpen })),
+
       addItem: (product, quantity = 1) => {
         set((state) => {
           const existingItem = state.items.find((item) => item.id === product.id);
+          let newItems;
           if (existingItem) {
-            return {
-              items: state.items.map((item) =>
-                item.id === product.id
-                  ? { ...item, quantity: item.quantity + quantity }
-                  : item
-              ),
-            };
+            newItems = state.items.map((item) =>
+              item.id === product.id
+                ? { ...item, quantity: item.quantity + quantity }
+                : item
+            );
+          } else {
+            newItems = [...state.items, { ...product, quantity }];
           }
-          return { items: [...state.items, { ...product, quantity }] };
+          return { 
+            items: newItems,
+            isDrawerOpen: true // Open drawer when item added
+          };
         });
       },
       removeItem: (productId) => {

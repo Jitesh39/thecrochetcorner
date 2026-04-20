@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import CartDrawer from "@/components/CartDrawer";
 
 export default function LayoutWrapper({ children }) {
   const pathname = usePathname();
@@ -11,7 +12,8 @@ export default function LayoutWrapper({ children }) {
   return (
     <>
       <Navbar />
-      <main className={`flex-grow ${isAdminOrDashboard ? "pt-0" : "pt-24"}`}>
+      <CartDrawer />
+      <main className="flex-grow">
         {children}
       </main>
       <Footer />

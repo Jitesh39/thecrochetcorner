@@ -45,13 +45,13 @@ export default function ShopPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-10">
           <h1 className="text-5xl md:text-5xl font-serif font-bold text-[var(--color-text-main)] mb-4">Our Collection</h1>
           <p className="text-[var(--color-text-muted)] max-w-xl mx-auto">Each piece is handcrafted with premium yarn and hours of careful stitching</p>
         </div>
 
         {/* Filters and Sort Row */}
-        <div className="flex flex-col lg:flex-row justify-between items-center gap-8 mb-16 px-2">
+        <div className="flex flex-col lg:flex-row justify-between items-center gap-8 mb-10 px-2">
           <div className="flex items-center gap-3 overflow-x-auto no-scrollbar w-full lg:w-auto pb-2 lg:pb-0">
             {categories.map((cat) => (
               <button

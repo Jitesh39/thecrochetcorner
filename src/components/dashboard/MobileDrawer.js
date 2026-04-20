@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
+import toast from "react-hot-toast";
 import {
   LayoutDashboard,
   ShoppingBag,
@@ -29,14 +30,15 @@ export default function MobileDrawer({ isOpen, setIsOpen }) {
   const router = useRouter();
 
   const handleLogout = async () => {
-    if (window.confirm("Are you sure you want to log out?")) {
-      try {
-        await signOut(auth);
-        setIsOpen(false);
-        router.push("/login");
-      } catch (error) {
-        console.error("Logout error:", error);
-      }
+    try {
+      await signOut(auth);
+      localStorage.clear();
+      setIsOpen(false);
+      toast.success("Logged out successfully");
+      router.push("/login");
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast.error("Failed to log out");
     }
   };
 
