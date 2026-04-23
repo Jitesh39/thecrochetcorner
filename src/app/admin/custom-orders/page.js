@@ -94,38 +94,40 @@ export default function CustomOrdersPage() {
                           <User size={24} />
                         </div>
                         <div>
-                          <h3 className="font-bold text-gray-800 text-lg">{order.name}</h3>
+                          <h3 className="font-bold text-gray-800 text-lg">{order.userName || "Unknown Customer"}</h3>
                           <p className="text-xs text-gray-400 font-medium uppercase tracking-widest">
-                            Order ID: #{order.id.slice(-6).toUpperCase()}
+                            Order ID: {order.orderId || `#${order.id.slice(-6).toUpperCase()}`}
                           </p>
                         </div>
                       </div>
                       <span className={`px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest ${
-                        order.status === "Accepted" ? "bg-green-50 text-green-600" :
-                        order.status === "Hold" ? "bg-orange-50 text-orange-600" :
+                        order.status === "accepted" ? "bg-green-50 text-green-600" :
+                        order.status === "hold" ? "bg-orange-50 text-orange-600" :
                         "bg-blue-50 text-blue-600"
                       }`}>
                         {order.status}
                       </span>
                     </div>
-
+ 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                       <div className="flex items-center gap-3 text-gray-600">
                         <Mail size={16} className="text-gray-400" />
-                        {order.email}
+                        {order.userEmail || "No email provided"}
                       </div>
                       <div className="flex items-center gap-3 text-gray-600">
                         <Phone size={16} className="text-gray-400" />
-                        {order.phone || "No phone provided"}
+                        {order.userPhone || "No phone provided"}
                       </div>
                     </div>
-
+ 
                     <div className="bg-gray-50 rounded-2xl p-6 space-y-4">
                       <div className="flex items-start gap-4">
                         <MessageSquare size={18} className="text-[var(--color-primary)] mt-1" />
-                        <div>
-                          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Requirements</p>
-                          <p className="text-sm text-gray-700 leading-relaxed">{order.requirement}</p>
+                        <div className="flex-1">
+                          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Requirements / Message</p>
+                          <p className="text-sm text-gray-700 leading-relaxed">
+                            {order.message || "No special instructions provided."}
+                          </p>
                         </div>
                       </div>
                       <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-200">
@@ -144,7 +146,7 @@ export default function CustomOrdersPage() {
                       </div>
                     </div>
                   </div>
-
+ 
                   {/* Right Column: Pricing & Actions */}
                   <div className="w-full lg:w-80 bg-[var(--color-secondary)]/30 rounded-3xl p-6 sm:p-8 flex flex-col justify-between gap-6 border border-[var(--color-secondary)]">
                     <div className="space-y-4">
@@ -160,20 +162,20 @@ export default function CustomOrdersPage() {
                         />
                       </div>
                     </div>
-
+ 
                     <div className="space-y-3">
                       <button
-                        onClick={() => handleUpdateStatus(order.id, "Accepted")}
-                        disabled={updatingId === order.id || order.status === "Accepted"}
+                        onClick={() => handleUpdateStatus(order.id, "accepted")}
+                        disabled={updatingId === order.id || order.status === "accepted"}
                         className={`w-full py-4 flex items-center justify-center gap-2 rounded-2xl shadow-lg border-0 transition-all group ${
-                          order.status === "Accepted"
+                          order.status === "accepted"
                             ? "bg-gray-400 text-white cursor-not-allowed shadow-none"
                             : "btn-primary shadow-[var(--color-primary)]/20"
                         }`}
                       >
                         {updatingId === order.id ? (
                           <Loader2 size={18} className="animate-spin" />
-                        ) : order.status === "Accepted" ? (
+                        ) : order.status === "accepted" ? (
                           <>
                             <CheckCircle2 size={18} />
                             <span>Accepted</span>
@@ -186,12 +188,12 @@ export default function CustomOrdersPage() {
                         )}
                       </button>
                       <button
-                        onClick={() => handleUpdateStatus(order.id, "Hold")}
-                        disabled={updatingId === order.id}
+                        onClick={() => handleUpdateStatus(order.id, "hold")}
+                        disabled={updatingId === order.id || order.status === "hold"}
                         className="w-full bg-white text-orange-600 font-bold py-4 rounded-2xl border border-orange-100 hover:bg-orange-50 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <Clock size={18} />
-                        <span>Put on Hold</span>
+                        <span>{order.status === "hold" ? "On Hold" : "Put on Hold"}</span>
                       </button>
                     </div>
 

@@ -28,8 +28,8 @@ export default function MyOrders() {
       const regularOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), isCustom: false }));
       updateCombinedOrders(regularOrders, null);
     }, (err) => {
-        console.error("Regular orders error:", err);
-        setLoading(false);
+      console.error("Regular orders error:", err);
+      setLoading(false);
     });
 
     // Listen for Custom Orders
@@ -38,7 +38,7 @@ export default function MyOrders() {
       const customOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), isCustom: true }));
       updateCombinedOrders(null, customOrders);
     }, (err) => {
-        console.error("Custom orders error:", err);
+      console.error("Custom orders error:", err);
     });
 
     const updateCombinedOrders = (newRegular, newCustom) => {
@@ -96,10 +96,9 @@ export default function MyOrders() {
               <button
                 key={status}
                 onClick={() => setActiveFilter(status)}
-                className={`whitespace-nowrap px-5 py-2 rounded-full text-[10px] font-bold tracking-widest uppercase transition-all duration-300 ${
-                    activeFilter === status 
-                      ? "bg-[var(--color-primary)] text-white shadow-lg shadow-[var(--color-primary)]/20 scale-105" 
-                      : "bg-gray-50 text-gray-400 hover:bg-gray-100"
+                className={`whitespace-nowrap px-5 py-2 rounded-full text-[10px] font-bold tracking-widest uppercase transition-all duration-300 ${activeFilter === status
+                    ? "bg-[var(--color-primary)] text-white shadow-lg shadow-[var(--color-primary)]/20 scale-105"
+                    : "bg-gray-50 text-gray-400 hover:bg-gray-100"
                   }`}
               >
                 {status}
@@ -138,26 +137,27 @@ export default function MyOrders() {
                   <tr key={order.id} className="hover:bg-gray-50/50 transition-colors group">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-gray-700">#{order.id.slice(-6).toUpperCase()}</span>
+                        <span className="font-bold text-gray-700">
+                          {order.orderId || `#${order.id.slice(-6).toUpperCase()}`}
+                        </span>
                         <ArrowUpRight size={14} className="text-gray-300 group-hover:text-[var(--color-primary)] transition-colors" />
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      {order.isCustom ? (
+                      {order.isCustom && !order.items ? (
                         <div className="h-10 w-10 rounded-full bg-pink-50 flex items-center justify-center text-pink-500">
                           <ShoppingBag size={20} />
                         </div>
                       ) : (
                         <div className="flex -space-x-2 overflow-hidden">
                           {order.items?.map((item, idx) => (
-                            <Link 
-                              key={idx} 
-                              href={`/product/${item.id}`}
+                            <div
+                              key={`${order.id}-${item.productId || idx}`}
                               title={item.name}
                               className="inline-block h-10 w-10 rounded-full ring-2 ring-white bg-gray-50 overflow-hidden relative cursor-pointer hover:scale-110 transition-transform z-10 hover:z-20"
                             >
                               <img src={item.image || "/placeholder.png"} alt={item.name} className="object-cover h-full w-full" />
-                            </Link>
+                            </div>
                           ))}
                         </div>
                       )}
@@ -171,21 +171,20 @@ export default function MyOrders() {
                       {hasMounted && (order.createdAt?.toDate ? order.createdAt.toDate().toLocaleDateString() : "Just now")}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2.5 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${
-                        order.status === "Delivered" || order.status === "Accepted" ? "bg-green-50 text-green-600" :
-                        order.status === "Hold" ? "bg-orange-50 text-orange-600" :
-                        "bg-blue-50 text-blue-600"
-                      }`}>
+                      <span className={`px-2.5 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${order.status === "Delivered" || order.status === "Accepted" || order.status === "Confirmed" ? "bg-green-50 text-green-600" :
+                          order.status === "Hold" ? "bg-orange-50 text-orange-600" :
+                            "bg-blue-50 text-blue-600"
+                        }`}>
                         {order.status || (order.isCustom ? "Pending" : "Processing")}
                       </span>
                     </td>
                     <td className="px-6 py-4 font-bold text-gray-800 whitespace-nowrap">
-                      ₹{order.isCustom ? (order.price || 0) : order.totalAmount?.toLocaleString()}
+                      ₹{order.isCustom && !order.items ? (order.price || 0) : order.totalAmount?.toLocaleString()}
                     </td>
                     <td className="px-6 py-4 text-right whitespace-nowrap">
                       {order.trackingId ? (
                         <div className="flex flex-col items-end gap-1">
-                          <a 
+                          <a
                             href={`https://shiprocket.co/tracking/${order.trackingId}`}
                             target="_blank"
                             rel="noopener noreferrer"
