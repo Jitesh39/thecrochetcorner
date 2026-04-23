@@ -32,7 +32,7 @@ export default function Navbar() {
     if (role === "admin") {
       router.push("/admin");
     } else {
-      router.push("/dashboard");
+      router.push("/account");
     }
   };
 
@@ -123,8 +123,8 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Hide main navbar on admin and dashboard pages if needed
-  if (pathname.startsWith("/admin") || pathname.startsWith("/dashboard")) {
+  // Hide main navbar on admin and account pages if needed
+  if (pathname.startsWith("/admin") || pathname.startsWith("/account")) {
     return null;
   }
 

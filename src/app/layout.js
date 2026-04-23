@@ -22,7 +22,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${nunito.variable} ${playfair.variable} antialiased min-h-screen flex flex-col`}>
+      <body suppressHydrationWarning className={`${nunito.variable} ${playfair.variable} antialiased min-h-screen flex flex-col`}>
         <Toaster
           position="top-center"
           containerStyle={{ zIndex: 100000 }}

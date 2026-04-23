@@ -88,7 +88,11 @@ export default function Bestsellers() {
                       />
                     ))}
                   </div>
-                  <span className="text-xs text-gray-400 font-medium ml-1">(Handmade)</span>
+                  {(() => {
+                    const totalOrders = (product.baseOrderCount || 0) + (product.orderCount || 0);
+                    const displayCount = totalOrders > 999 ? (totalOrders / 1000).toFixed(1) + 'k+' : totalOrders;
+                    return <span className="text-xs text-gray-400 font-medium ml-1">({displayCount})</span>;
+                  })()}
                 </div>
 
                 <button

@@ -3,13 +3,15 @@
 import { useState, useEffect } from "react";
 import { db } from "@/lib/firebase";
 import { doc, onSnapshot, setDoc } from "firebase/firestore";
-import { User, MessageSquare, Plus, Trash2, Save, Loader2, Star } from "lucide-react";
+import { User, MessageSquare, Plus, Trash2, Save, Loader2, Star, Image as ImageIcon } from "lucide-react";
 import toast from "react-hot-toast";
+import Image from "next/image";
 
 export default function HappyCustomersSettings() {
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingIdx, setUploadingIdx] = useState(null);
 
   useEffect(() => {
     const unsub = onSnapshot(doc(db, "settings", "testimonials"), (docSnap) => {
@@ -22,7 +24,7 @@ export default function HappyCustomersSettings() {
   }, []);
 
   const handleAdd = () => {
-    setEntries([...entries, { name: "", product: "", text: "", rating: 5 }]);
+    setEntries([...entries, { name: "", product: "", text: "", rating: 5, imageUrl: "" }]);
   };
 
   const handleRemove = (index) => {
@@ -33,6 +35,40 @@ export default function HappyCustomersSettings() {
     const newEntries = [...entries];
     newEntries[index][field] = value;
     setEntries(newEntries);
+  };
+
+  const handleImageUpload = async (index, file) => {
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Image must be less than 2MB");
+      return;
+    }
+    
+    setUploadingIdx(index);
+    try {
+      const base64Image = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+      });
+
+      const uploadRes = await fetch("/api/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ file: base64Image }),
+      });
+
+      const resData = await uploadRes.json();
+      if (!uploadRes.ok) throw new Error(resData.details || "Image upload failed");
+      
+      handleChange(index, "imageUrl", resData.url);
+      toast.success("Image uploaded!");
+    } catch (err) {
+      toast.error(err.message || "Failed to upload image");
+    } finally {
+      setUploadingIdx(null);
+    }
   };
 
   const handleSave = async () => {
@@ -80,6 +116,34 @@ export default function HappyCustomersSettings() {
               >
                 <Trash2 size={16} />
               </button>
+
+              <div className="space-y-2">
+                 <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1">
+                    <ImageIcon size={10} /> Customer Image
+                 </label>
+                 <div className="flex items-center gap-4">
+                   <div className="w-16 h-16 rounded-full bg-gray-100 border-2 border-white shadow-sm overflow-hidden flex-shrink-0 relative">
+                     {entry.imageUrl ? (
+                       <Image src={entry.imageUrl} alt="Preview" fill className="object-cover" />
+                     ) : (
+                       <div className="w-full h-full flex items-center justify-center text-gray-300">
+                         <User size={24} />
+                       </div>
+                     )}
+                     {uploadingIdx === idx && (
+                       <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
+                         <Loader2 className="w-5 h-5 animate-spin text-[var(--color-primary)]" />
+                       </div>
+                     )}
+                   </div>
+                   <input
+                     type="file"
+                     accept="image/png, image/jpeg, image/jpg, image/webp"
+                     onChange={(e) => handleImageUpload(idx, e.target.files[0])}
+                     className="text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-[var(--color-primary)]/10 file:text-[var(--color-primary)] hover:file:bg-[var(--color-primary)]/20 transition-all cursor-pointer w-full max-w-[200px]"
+                   />
+                 </div>
+              </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">

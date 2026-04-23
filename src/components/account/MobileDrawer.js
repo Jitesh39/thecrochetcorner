@@ -17,12 +17,12 @@ import {
 } from "lucide-react";
 
 const menuItems = [
-  { name: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
-  { name: "My Orders", icon: ShoppingBag, href: "/dashboard/orders" },
-  { name: "Wishlist", icon: Heart, href: "/dashboard/wishlist" },
-  { name: "Profile", icon: User, href: "/dashboard/profile" },
-  { name: "Addresses", icon: MapPin, href: "/dashboard/addresses" },
-  { name: "Settings", icon: Settings, href: "/dashboard/settings" },
+  { name: "Account", icon: LayoutDashboard, href: "/account" },
+  { name: "My Orders", icon: ShoppingBag, href: "/account/orders" },
+  { name: "Wishlist", icon: Heart, href: "/account/wishlist" },
+  { name: "Profile", icon: User, href: "/account/profile" },
+  { name: "Addresses", icon: MapPin, href: "/account/addresses" },
+  { name: "Settings", icon: Settings, href: "/account/settings" },
 ];
 
 export default function MobileDrawer({ isOpen, setIsOpen }) {
@@ -72,8 +72,8 @@ export default function MobileDrawer({ isOpen, setIsOpen }) {
                 href={item.href}
                 onClick={() => setIsOpen(false)}
                 className={`flex items-center gap-3 px-4 py-4 rounded-2xl text-base font-medium transition-all duration-300 ${isActive
-                    ? "bg-[var(--color-secondary)] text-[var(--color-primary)] shadow-sm border border-[var(--color-primary)]/10"
-                    : "text-gray-600 hover:bg-gray-50"
+                  ? "bg-[var(--color-secondary)] text-[var(--color-primary)] shadow-sm border border-[var(--color-primary)]/10"
+                  : "text-gray-600 hover:bg-gray-50"
                   }`}
               >
                 <Icon size={22} />

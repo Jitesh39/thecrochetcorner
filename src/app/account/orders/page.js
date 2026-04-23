@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuthStore } from "@/store/authStore";
 import { db } from "@/lib/firebase";
 import { collection, query, where, onSnapshot, orderBy } from "firebase/firestore";
-import { ShoppingBag, Search, Loader2, ArrowUpRight, Search as SearchIcon } from "lucide-react";
+import { ShoppingBag, Search, Loader2, ArrowUpRight, Search as SearchIcon, Truck } from "lucide-react";
 import Link from "next/link";
 
 export default function MyOrders() {
@@ -129,7 +129,8 @@ export default function MyOrders() {
                   <th className="px-6 py-4">Type</th>
                   <th className="px-6 py-4">Date</th>
                   <th className="px-6 py-4">Status</th>
-                  <th className="px-6 py-4 text-right">Total</th>
+                  <th className="px-6 py-4">Total</th>
+                  <th className="px-6 py-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
@@ -178,8 +179,27 @@ export default function MyOrders() {
                         {order.status || (order.isCustom ? "Pending" : "Processing")}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-right font-bold text-gray-800 whitespace-nowrap">
+                    <td className="px-6 py-4 font-bold text-gray-800 whitespace-nowrap">
                       ₹{order.isCustom ? (order.price || 0) : order.totalAmount?.toLocaleString()}
+                    </td>
+                    <td className="px-6 py-4 text-right whitespace-nowrap">
+                      {order.trackingId ? (
+                        <div className="flex flex-col items-end gap-1">
+                          <a 
+                            href={`https://shiprocket.co/tracking/${order.trackingId}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-blue-100 transition-all active:scale-95 border border-blue-100"
+                          >
+                            <Truck size={12} /> Track Order
+                          </a>
+                          <span className="text-[9px] text-gray-400 font-medium tracking-wide">
+                            {order.trackingId}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-gray-300 text-[10px] uppercase font-bold tracking-widest">-</span>
+                      )}
                     </td>
                   </tr>
                 ))}

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Sidebar from "@/components/dashboard/Sidebar";
-import MobileDrawer from "@/components/dashboard/MobileDrawer";
+import Sidebar from "@/components/account/Sidebar";
+import MobileDrawer from "@/components/account/MobileDrawer";
 import ScrollToTop from "@/components/admin/ScrollToTop"; // Reuse admin scroll to top
 import { Menu, User, Bell } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
@@ -10,7 +10,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-export default function DashboardLayout({ children }) {
+export default function AccountLayout({ children }) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const { user, loading } = useAuthStore();
   const router = useRouter();

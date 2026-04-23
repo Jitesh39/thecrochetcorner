@@ -3,7 +3,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Instagram, Facebook, Twitter, Mail, Heart } from "lucide-react";
 import { db } from "@/lib/firebase";
-import { doc, onSnapshot } from "firebase/firestore";
+import { doc, onSnapshot, collection, getDocs, query, limit } from "firebase/firestore";
+import Image from "next/image";
+import { useAuthStore } from "@/store/authStore";
+import { useRouter } from "next/navigation";
 
 export default function Footer() {
   const pathname = usePathname();
@@ -11,6 +14,21 @@ export default function Footer() {
     email: "hello@thecrochetcorner.com",
     instagram: "https://www.instagram.com/"
   });
+
+  const user = useAuthStore((state) => state.user);
+  const role = useAuthStore((state) => state.role);
+  const router = useRouter();
+
+  const handleAccountClick = (e) => {
+    e.preventDefault();
+    if (!user) {
+      router.push("/login");
+    } else if (role === "admin") {
+      router.push("/admin");
+    } else {
+      router.push("/account");
+    }
+  };
 
   useEffect(() => {
     const unsub = onSnapshot(doc(db, "settings", "contact"), (docSnap) => {
@@ -25,8 +43,23 @@ export default function Footer() {
     return () => unsub();
   }, []);
 
-  // Do not render footer on dashboard
-  if (pathname.startsWith("/dashboard")) {
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const q = query(collection(db, "categories"), limit(4));
+        const snap = await getDocs(q);
+        setCategories(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      } catch (err) {
+        console.error("Error fetching categories:", err);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  // Do not render footer on account/admin
+  if (pathname.startsWith("/account")) {
     return null;
   }
   if (pathname.startsWith("/admin")) {
@@ -35,10 +68,14 @@ export default function Footer() {
   return (
     <footer className="bg-white border-t border-[var(--color-secondary)] pt-12 pb-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-          <div className="col-span-1 md:col-span-2">
-            <h3 className="font-serif text-2xl font-bold text-[var(--color-primary)] mb-4">TheCrochetCorner</h3>
-            <p className="text-[var(--color-text-muted)] text-sm max-w-sm mb-6 leading-relaxed">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+          <div className="col-span-1 sm:col-span-2 lg:col-span-1">
+            <Link href="/" className="inline-block mb-4">
+              <div className="relative h-12 w-48">
+                <Image src="/logo1.png" alt="TheCrochetCorner" fill className="object-contain object-left" />
+              </div>
+            </Link>
+            <p className="text-[var(--color-text-muted)] text-sm mb-6 leading-relaxed">
               Handcrafted crochet gifts, elegant bouquets, and cozy accessories made with love and attention to detail. Every piece tells a unique story.
             </p>
             <div className="flex space-x-4 text-[var(--color-text-muted)]">
@@ -46,6 +83,21 @@ export default function Footer() {
               <a href={`mailto:${contact.email}`} className="hover:text-[var(--color-primary)] transition-colors"><Mail size={20} /></a>
             </div>
           </div>
+
+          {categories.length > 0 && (
+            <div>
+              <h4 className="font-medium text-[var(--color-text-main)] mb-4 tracking-wide uppercase text-sm">Categories</h4>
+              <ul className="space-y-3 text-sm text-[var(--color-text-muted)]">
+                {categories.map(cat => (
+                  <li key={cat.id}>
+                    <Link href={`/shop?category=${cat.slug}`} className="hover:text-[var(--color-primary)] transition-colors">
+                      {cat.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           <div>
             <h4 className="font-medium text-[var(--color-text-main)] mb-4 tracking-wide uppercase text-sm">Quick Links</h4>
@@ -60,7 +112,7 @@ export default function Footer() {
           <div>
             <h4 className="font-medium text-[var(--color-text-main)] mb-4 tracking-wide uppercase text-sm">Customer Care</h4>
             <ul className="space-y-3 text-sm text-[var(--color-text-muted)]">
-              <li><Link href="/dashboard" className="hover:text-[var(--color-primary)] transition-colors">My Account</Link></li>
+              <li><a href="#" onClick={handleAccountClick} className="hover:text-[var(--color-primary)] transition-colors">My Account</a></li>
               <li><Link href="/shipping" className="hover:text-[var(--color-primary)] transition-colors">Shipping & Returns</Link></li>
               <li><Link href="/terms" className="hover:text-[var(--color-primary)] transition-colors">Terms & Conditions</Link></li>
               <li><Link href="/privacy" className="hover:text-[var(--color-primary)] transition-colors">Privacy Policy</Link></li>

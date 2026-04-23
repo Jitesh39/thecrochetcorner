@@ -3,13 +3,17 @@
 import { useEffect, useState } from "react";
 import { db } from "@/lib/firebase";
 import { collection, onSnapshot, query, orderBy, doc, updateDoc } from "firebase/firestore";
-import { ShoppingBag, Search, Filter, Printer, CheckCircle, Clock, Search as SearchIcon, Loader2 } from "lucide-react";
+import { ShoppingBag, Search, Filter, Printer, CheckCircle, Clock, Search as SearchIcon, Loader2, Truck } from "lucide-react";
 import Link from "next/link";
+import { toast } from "react-hot-toast";
+import { useAuthStore } from "@/store/authStore";
 
 export default function OrdersPage() {
+  const user = useAuthStore((state) => state.user);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState(null);
+  const [shippingId, setShippingId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
 
@@ -101,11 +105,38 @@ export default function OrdersPage() {
       await updateDoc(doc(db, "orders", orderId), {
         status: "Accepted"
       });
+      toast.success("Order accepted");
     } catch (error) {
       console.error("Error updating order:", error);
-      alert("Failed to update order status.");
+      toast.error("Failed to update order status.");
     } finally {
       setUpdatingId(null);
+    }
+  };
+
+  const handleShipOrder = async (orderId) => {
+    setShippingId(orderId);
+    try {
+      const res = await fetch("/api/ship-order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ orderId, userId: user?.uid })
+      });
+      
+      const data = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to create shipment");
+      }
+      
+      toast.success("Shipment created! Tracking ID: " + data.trackingId);
+    } catch (error) {
+      console.error("Error creating shipment:", error);
+      toast.error(error.message || "Failed to create shipment.");
+    } finally {
+      setShippingId(null);
     }
   };
 
@@ -234,9 +265,24 @@ export default function OrdersPage() {
                         >
                           {updatingId === order.id ? <Loader2 size={12} className="animate-spin" /> : <><CheckCircle size={12} /> Accept</>}
                         </button>
+                      ) : order.status === "Accepted" ? (
+                        <button
+                          onClick={() => handleShipOrder(order.id)}
+                          disabled={shippingId === order.id}
+                          className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-500 text-white rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-blue-600 transition-all disabled:opacity-50 hover:shadow-md active:scale-95"
+                        >
+                          {shippingId === order.id ? <Loader2 size={12} className="animate-spin" /> : <><Truck size={12} /> Ship Order</>}
+                        </button>
                       ) : (
-                        <div className="inline-flex items-center gap-1.5 px-4 py-2 bg-gray-50 text-gray-400 rounded-lg text-[10px] font-bold uppercase tracking-widest border border-gray-100">
-                          <CheckCircle size={12} /> Processed
+                        <div className="flex flex-col items-end gap-1">
+                          <div className="inline-flex items-center gap-1.5 px-4 py-2 bg-gray-50 text-gray-500 rounded-lg text-[10px] font-bold uppercase tracking-widest border border-gray-100">
+                            <CheckCircle size={12} /> {order.status === "Delivered" ? "Delivered" : "Processed"}
+                          </div>
+                          {order.trackingId && (
+                            <span className="text-[10px] text-gray-400 font-medium tracking-wide">
+                              {order.courier ? `${order.courier}: ` : ''}{order.trackingId}
+                            </span>
+                          )}
                         </div>
                       )}
                     </td>

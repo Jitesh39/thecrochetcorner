@@ -7,7 +7,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { CreditCard, Lock, CheckCircle, Loader2 } from "lucide-react";
 import { db } from "@/lib/firebase";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, writeBatch, doc, increment } from "firebase/firestore";
 
 export default function CheckoutPage() {
   const { items, getCartTotal, clearCart } = useCartStore();
@@ -97,7 +97,17 @@ export default function CheckoutPage() {
         createdAt: serverTimestamp()
       });
 
-      // 4. Success UI
+      // 4. Update Product Order Counts
+      const batch = writeBatch(db);
+      items.forEach(item => {
+        const productRef = doc(db, "products", item.id);
+        batch.update(productRef, {
+          orderCount: increment(item.quantity)
+        });
+      });
+      await batch.commit();
+
+      // 5. Success UI
       setOrdered(true);
       clearCart();
     } catch (error) {
@@ -119,7 +129,7 @@ export default function CheckoutPage() {
           <p className="text-[var(--color-text-muted)] mb-8">
             Your order has been placed successfully. We've received your request and our team will start processing it soon.
           </p>
-          <button onClick={() => router.push("/dashboard/orders")} className="btn-primary w-full py-4">
+          <button onClick={() => router.push("/account/orders")} className="btn-primary w-full py-4">
             Track My Order
           </button>
         </div>

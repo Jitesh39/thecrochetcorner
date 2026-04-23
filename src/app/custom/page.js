@@ -1,19 +1,24 @@
 "use client";
 
-import { useState } from "react";
-import { ChevronRight, Check, Send } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { ChevronRight, Check, Send, IndianRupee, ShoppingCart, Info, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
+import { db } from "@/lib/firebase";
+import { collection, addDoc, serverTimestamp, doc, onSnapshot } from "firebase/firestore";
+import toast from "react-hot-toast";
 
 export default function CrochetStudio() {
   const router = useRouter();
   const [step, setStep] = useState(1);
-  const [status, setStatus] = useState("idle"); // idle, loading, success, error
+  const [status, setStatus] = useState("idle");
+  const [pricing, setPricing] = useState(null);
   const [formData, setFormData] = useState({
     type: "",
     color: "",
     size: "",
+    colorType: "normal", // normal or premium
     message: "",
     name: "",
     email: "",
@@ -31,6 +36,36 @@ export default function CrochetStudio() {
   const colors = ["Blush Pink", "Lavender", "Sage Green", "Cream", "Sunset Orange", "Sky Blue"];
   const sizes = ["Small", "Medium", "Large", "Extra Large"];
 
+  // Fetch Pricing Settings
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, "settings", "customPricing"), (docSnap) => {
+      if (docSnap.exists()) {
+        setPricing(docSnap.data());
+      }
+    });
+    return () => unsub();
+  }, []);
+
+  // Calculate Price
+  const priceDetails = useMemo(() => {
+    if (!pricing) return { base: 0, size: 0, color: 0, total: 0 };
+
+    const typeKey = formData.type.toLowerCase().replace(/\s+/g, "");
+    const sizeKey = formData.size.toLowerCase().replace(/\s+/g, "");
+    const colorTypeKey = formData.colorType.toLowerCase();
+
+    const base = pricing.basePrice?.[typeKey] || 0;
+    const size = pricing.size?.[sizeKey] || 0;
+    const color = pricing.color?.[colorTypeKey] || 0;
+
+    return {
+      base,
+      size,
+      color,
+      total: base + size + color
+    };
+  }, [formData.type, formData.size, formData.colorType, pricing]);
+
   const handleSelect = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     if (step < 4) setStep(step + 1);
@@ -38,26 +73,22 @@ export default function CrochetStudio() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Check if user is logged in
+
     const user = useAuthStore.getState().user;
     if (!user) {
-      alert("Please login to continue");
+      toast.error("Please login to continue");
       router.push("/login");
       return;
     }
 
     if (!formData.name || !formData.email) {
-      alert("Please fill in required fields (Name and Email)");
+      toast.error("Please fill in required fields");
       return;
     }
-    
-    setStatus("loading");
-    
-    try {
-      const { db } = await import("@/lib/firebase");
-      const { collection, addDoc, serverTimestamp } = await import("firebase/firestore");
 
+    setStatus("loading");
+
+    try {
       await addDoc(collection(db, "customOrders"), {
         userId: user.uid,
         name: formData.name,
@@ -66,25 +97,64 @@ export default function CrochetStudio() {
         requirement: formData.message || "",
         type: formData.type || "Custom",
         color: formData.color || "Default",
+        colorType: formData.colorType,
         size: formData.size || "Standard",
         status: "Pending",
-        price: 0,
+        price: priceDetails.total,
+        priceBreakdown: {
+          base: priceDetails.base,
+          size: priceDetails.size,
+          color: priceDetails.color
+        },
         createdAt: serverTimestamp()
       });
 
       setStatus("success");
-      setFormData({
-        type: "",
-        color: "",
-        size: "",
-        message: "",
-        name: "",
-        email: "",
-        phone: "",
-      });
+      toast.success("Order request sent successfully!");
     } catch (error) {
       console.error("Submission error:", error);
       setStatus("error");
+      toast.error("Failed to send request");
+    }
+  };
+
+  const addToCart = async () => {
+    const user = useAuthStore.getState().user;
+    if (!user) {
+      toast.error("Please login to continue");
+      router.push("/login");
+      return;
+    }
+
+    if (!formData.type || !formData.size || !formData.color) {
+      toast.error("Please complete the design steps first");
+      return;
+    }
+
+    setStatus("loading");
+    try {
+      await addDoc(collection(db, "cart"), {
+        userId: user.uid,
+        productId: `custom-${Date.now()}`,
+        name: `Custom ${formData.type}`,
+        price: priceDetails.total,
+        quantity: 1,
+        image: "/custom-crochet.png", // Fallback placeholder for custom items
+        category: "custom",
+        customization: {
+          type: formData.type,
+          color: formData.color,
+          size: formData.size,
+          message: formData.message
+        },
+        createdAt: serverTimestamp()
+      });
+      toast.success("Added to cart!");
+      router.push("/cart");
+    } catch (error) {
+      toast.error("Failed to add to cart");
+    } finally {
+      setStatus("idle");
     }
   };
 
@@ -108,7 +178,7 @@ export default function CrochetStudio() {
         <div className="flex flex-col lg:flex-row gap-8 mt-12">
 
           {/* Left Side: Step Indicator */}
-          <div className="w-full lg:w-1/4">
+          <div className="w-full lg:w-1/4 space-y-6">
             <div className="bg-white rounded-[1.5rem] p-6 shadow-sm border border-gray-100 sticky top-24">
               <h3 className="text-lg font-serif font-bold text-[var(--color-text-main)] mb-6">Studio Progress</h3>
               <div className="space-y-4">
@@ -137,13 +207,33 @@ export default function CrochetStudio() {
                 ))}
               </div>
 
-              {/* Summary Helper */}
+              {/* Price Breakdown Helper */}
               {step > 1 && (
-                <div className="mt-8 pt-6 border-t border-gray-100">
-                  <p className="text-[9px] uppercase tracking-widest text-gray-400 font-bold mb-3">Current Build</p>
-                  <p className="text-xs italic text-[var(--color-text-muted)]">
-                    "A {formData.size || "..."} {formData.color || "..."} {formData.type || "creative piece"}..."
-                  </p>
+                <div className="mt-8 pt-6 border-t border-gray-100 space-y-3">
+                  <p className="text-[9px] uppercase tracking-widest text-gray-400 font-bold">Estimated Pricing</p>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-[11px]">
+                      <span className="text-gray-500 font-medium">Base Price</span>
+                      <span className="text-gray-800 font-bold">₹{priceDetails.base}</span>
+                    </div>
+                    {priceDetails.size > 0 && (
+                      <div className="flex justify-between text-[11px]">
+                        <span className="text-gray-500 font-medium">Size Adj.</span>
+                        <span className="text-green-600 font-bold">+₹{priceDetails.size}</span>
+                      </div>
+                    )}
+                    {priceDetails.color > 0 && (
+                      <div className="flex justify-between text-[11px]">
+                        <span className="text-gray-500 font-medium">Color Adj.</span>
+                        <span className="text-green-600 font-bold">+₹{priceDetails.color}</span>
+                      </div>
+                    )}
+                    <div className="h-px bg-gray-50 my-1"></div>
+                    <div className="flex justify-between text-sm pt-1">
+                      <span className="text-gray-800 font-bold">Total</span>
+                      <span className="text-[var(--color-primary)] font-black">₹{priceDetails.total}</span>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
@@ -164,8 +254,8 @@ export default function CrochetStudio() {
                     className="space-y-4"
                   >
                     <div className="space-y-2">
-                      <h2 className="text-3xl font-serif font-bold text-[var(--color-text-main)]">1. What are we making?</h2>
-                      <p className="text-sm text-[var(--color-text-muted)]">Select the base item for your custom order.</p>
+                      <h2 className="text-3xl font-serif font-bold text-[var(--color-text-main)]">Choose Type</h2>
+                      <p className="text-sm text-[var(--color-text-muted)]">Select the type of item you want to create.</p>
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
                       {types.map((t) => (
@@ -193,15 +283,31 @@ export default function CrochetStudio() {
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
-                    className="space-y-4"
+                    className="space-y-6"
                   >
                     <div className="flex items-center gap-4 mb-2">
                       <button onClick={() => setStep(1)} className="text-gray-400 hover:text-[var(--color-primary)] transition-colors">&larr; Back</button>
                     </div>
                     <div className="space-y-2">
-                      <h2 className="text-3xl font-serif font-bold text-[var(--color-text-main)]">2. Choose your palette</h2>
+                      <h2 className="text-3xl font-serif font-bold text-[var(--color-text-main)]">Pick Colors</h2>
                       <p className="text-sm text-[var(--color-text-muted)]">Pick the primary yarn color for your {formData.type}.</p>
                     </div>
+
+                    <div className="flex gap-4 p-1 bg-gray-50 rounded-2xl w-fit mb-4">
+                      {["normal", "premium"].map((type) => (
+                        <button
+                          key={type}
+                          onClick={() => setFormData(prev => ({ ...prev, colorType: type }))}
+                          className={`px-6 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${formData.colorType === type
+                            ? "bg-white text-[var(--color-primary)] shadow-sm"
+                            : "text-gray-400 hover:text-gray-600"
+                            }`}
+                        >
+                          {type}
+                        </button>
+                      ))}
+                    </div>
+
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
                       {colors.map((c) => (
                         <button
@@ -234,7 +340,7 @@ export default function CrochetStudio() {
                       <button onClick={() => setStep(2)} className="text-gray-400 hover:text-[var(--color-primary)] transition-colors">&larr; Back</button>
                     </div>
                     <div className="space-y-2">
-                      <h2 className="text-3xl font-serif font-bold text-[var(--color-text-main)]">3. Select the size</h2>
+                      <h2 className="text-3xl font-serif font-bold text-[var(--color-text-main)]">Select Size</h2>
                       <p className="text-sm text-[var(--color-text-muted)]">How big would you like your {formData.color} {formData.type} to be?</p>
                     </div>
                     <div className="grid grid-cols-2 gap-6">
@@ -250,6 +356,9 @@ export default function CrochetStudio() {
                           <span className={`text-lg font-serif font-bold ${formData.size === s ? "text-[var(--color-primary)]" : "text-[var(--color-text-main)]"}`}>
                             {s}
                           </span>
+                          {pricing?.size?.[s.toLowerCase()] > 0 && (
+                            <p className="text-[10px] text-green-600 font-bold mt-1">+₹{pricing.size[s.toLowerCase()]}</p>
+                          )}
                         </button>
                       ))}
                     </div>
@@ -297,15 +406,15 @@ export default function CrochetStudio() {
                       ) : (
                         <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                           <div className="space-y-2 mb-6">
-                            <h2 className="text-3xl font-serif font-bold text-[var(--color-text-main)]">4. Personalize & Contact</h2>
+                            <h2 className="text-3xl font-serif font-bold text-[var(--color-text-main)]">Add Message</h2>
                             <p className="text-sm text-[var(--color-text-muted)]">Almost there! Add a message and your details for the studio.</p>
                           </div>
 
                           <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="space-y-2">
-                              <label className="text-xs font-bold uppercase tracking-widest text-gray-400">Personal Message</label>
+                              <label className="text-xs font-bold uppercase tracking-widest text-gray-400">Personal Message / Requirements</label>
                               <textarea
-                                placeholder="Write a personal message to include with your gift..."
+                                placeholder="Describe any specific requirements or a personal message..."
                                 className="w-full p-6 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-[var(--color-primary)] outline-none min-h-[120px] text-sm transition-all"
                                 value={formData.message}
                                 onChange={(e) => setFormData({ ...formData, message: e.target.value })}
@@ -345,31 +454,32 @@ export default function CrochetStudio() {
                               />
                             </div>
 
-                            <button
-                              type="submit"
-                              disabled={status === "loading"}
-                              className={`w-full btn-primary flex items-center justify-center gap-3 py-5 rounded-2xl shadow-lg border-0 transition-all ${status === "loading" ? "opacity-70 cursor-not-allowed" : ""}`}
-                            >
-                              {status === "loading" ? (
-                                <span className="flex items-center gap-2">
-                                  <motion.div
-                                    animate={{ rotate: 360 }}
-                                    transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                                    className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
-                                  />
-                                  Sending...
-                                </span>
-                              ) : (
-                                <>
-                                  <Send size={18} />
-                                  Submit Custom Order
-                                </>
-                              )}
-                            </button>
+                            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                              <button
+                                type="submit"
+                                disabled={status === "loading"}
+                                className={`flex-1 btn-primary flex items-center justify-center gap-3 py-5 rounded-2xl shadow-lg border-0 transition-all ${status === "loading" ? "opacity-70 cursor-not-allowed" : ""}`}
+                              >
+                                {status === "loading" ? (
+                                  <Loader2 className="animate-spin" size={18} />
+                                ) : (
+                                  <>
+                                    <Send size={18} />
+                                    Submit Request
+                                  </>
+                                )}
+                              </button>
 
-                            {status === "error" && (
-                              <p className="text-red-500 text-sm text-center">Something went wrong. Please try again.</p>
-                            )}
+                              <button
+                                type="button"
+                                onClick={addToCart}
+                                disabled={status === "loading"}
+                                className="flex-1 bg-white border-2 border-[var(--color-primary)] text-[var(--color-primary)] font-bold flex items-center justify-center gap-3 py-5 rounded-2xl hover:bg-[var(--color-secondary)]/10 transition-all active:scale-95"
+                              >
+                                <ShoppingCart size={18} />
+                                Add to Cart
+                              </button>
+                            </div>
                           </form>
                         </motion.div>
                       )}

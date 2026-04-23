@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuthStore } from "@/store/authStore";
 import { db } from "@/lib/firebase";
 import { collection, query, where, getDocs, limit, orderBy } from "firebase/firestore";
-import DashboardCards from "@/components/dashboard/DashboardCards";
+import DashboardCards from "@/components/account/DashboardCards";
 import { ShoppingBag, Heart, User, ArrowRight, Edit2 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -78,7 +78,7 @@ export default function UserDashboard() {
               <p className="text-sm text-gray-400 font-medium mb-6">{user?.email}</p>
               
               <Link 
-                href="/dashboard/profile"
+                href="/account/profile"
                 className="inline-flex items-center gap-2 px-6 py-2.5 bg-gray-50 text-[var(--color-primary)] text-xs font-bold rounded-xl hover:bg-[var(--color-secondary)] transition-all uppercase tracking-widest"
               >
                 Edit Profile
@@ -105,7 +105,7 @@ export default function UserDashboard() {
                 <ShoppingBag size={20} className="text-[var(--color-primary)]" />
                 <h3 className="font-bold text-gray-800">Recent Orders</h3>
               </div>
-              <Link href="/dashboard/orders" className="text-xs font-bold text-[var(--color-primary)] hover:underline flex items-center gap-1">
+              <Link href="/account/orders" className="text-xs font-bold text-[var(--color-primary)] hover:underline flex items-center gap-1">
                 View All <ArrowRight size={14} />
               </Link>
             </div>

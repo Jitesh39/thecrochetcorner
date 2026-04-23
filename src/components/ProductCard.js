@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { useCartStore } from "@/store/cartStore";
+import { Star } from "lucide-react";
 
 export default function ProductCard({ product }) {
   const [isHovered, setIsHovered] = useState(false);
@@ -42,6 +43,14 @@ export default function ProductCard({ product }) {
       <Link href={`/product/${product.id}`} className="p-5 flex flex-col flex-grow">
         <div className="text-[10px] uppercase tracking-widest text-[var(--color-text-muted)] mb-2 font-medium">
           {product.category}
+        </div>
+        <div className="flex items-center gap-1 mb-2 text-yellow-400">
+          <Star size={12} fill="currentColor" />
+          {(() => {
+            const totalOrders = (product.baseOrderCount || 0) + (product.orderCount || 0);
+            const displayCount = totalOrders > 999 ? (totalOrders / 1000).toFixed(1) + 'k+' : totalOrders;
+            return <span className="text-[10px] text-gray-400 font-medium ml-1">5.0 <span className="text-gray-300 ml-1">({displayCount})</span></span>;
+          })()}
         </div>
         <h3 className="font-serif text-lg text-[var(--color-text-main)] mb-2 line-clamp-1 group-hover:text-[var(--color-primary)] transition-colors">
           {product.name}

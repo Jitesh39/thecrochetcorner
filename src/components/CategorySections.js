@@ -13,12 +13,13 @@ import { motion } from "framer-motion";
 
 export default function CategorySections() {
   const [products, setProducts] = useState([]);
+  const [dbCategories, setDbCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const addItem = useCartStore((state) => state.addItem);
   const { toggleItem, isInWishlist } = useWishlistStore();
 
   useEffect(() => {
-    const unsub = onSnapshot(collection(db, "products"), (snapshot) => {
+    const unsubProducts = onSnapshot(collection(db, "products"), (snapshot) => {
       const productsData = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
@@ -27,7 +28,18 @@ export default function CategorySections() {
       setLoading(false);
     });
 
-    return () => unsub();
+    const unsubCategories = onSnapshot(collection(db, "categories"), (snapshot) => {
+      const catsData = snapshot.docs.map(doc => ({
+        title: doc.data().name,
+        slug: doc.data().slug
+      }));
+      setDbCategories(catsData);
+    });
+
+    return () => {
+      unsubProducts();
+      unsubCategories();
+    };
   }, []);
 
   const handleToggleWishlist = (e, product) => {
@@ -42,17 +54,17 @@ export default function CategorySections() {
   };
 
   // Group products by category
-  const categoriesList = [
-    { title: "Flowers", slug: "flowers" },
-    { title: "Bouquets", slug: "bouquets" },
-    { title: "Gifts", slug: "gifts" },
-    { title: "Accessories", slug: "accessories" }
-  ];
-
-  const categories = categoriesList.map(cat => ({
-    title: cat.title,
-    products: products.filter(p => p.category === cat.title).slice(0, 5)
-  })).filter(cat => cat.products.length > 0);
+  const categories = dbCategories.map(cat => {
+    const slug = cat.slug || cat.title.toLowerCase().replace(/\s+/g, '');
+    return {
+      title: cat.title,
+      slug: slug,
+      products: products.filter(p => {
+        const productCat = p.category?.toLowerCase().replace(/\s+/g, '') || "";
+        return productCat === slug;
+      }).slice(0, 5)
+    };
+  }).filter(cat => cat.products.length > 0);
 
   return (
     <section className="py-12 bg-[#faf9f8] overflow-hidden">
@@ -80,7 +92,7 @@ export default function CategorySections() {
                   {cat.title}
                 </h3>
                 <Link
-                  href={`/shop?category=${cat.title}`}
+                  href={`/shop?category=${cat.slug}`}
                   className="group flex items-center gap-2 text-sm font-medium text-[var(--color-primary)] hover:text-[var(--color-primary-dark)] transition-all"
                 >
                   View All <span className="transition-transform group-hover:translate-x-1">&rarr;</span>
@@ -117,7 +129,12 @@ export default function CategorySections() {
                       <div className="flex items-center justify-center sm:justify-start gap-1 mb-2 text-yellow-400">
                         <Star size={12} fill="currentColor" />
                         <span className="text-[10px] text-gray-400 font-medium ml-1">
-                          5.0 <span className="text-gray-300 ml-1">(Handmade)</span>
+                          5.0 
+                          {(() => {
+                            const totalOrders = (product.baseOrderCount || 0) + (product.orderCount || 0);
+                            const displayCount = totalOrders > 999 ? (totalOrders / 1000).toFixed(1) + 'k+' : totalOrders;
+                            return <span className="text-gray-300 ml-1">({displayCount})</span>;
+                          })()}
                         </span>
                       </div>
 

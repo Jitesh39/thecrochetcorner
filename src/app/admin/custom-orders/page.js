@@ -164,11 +164,20 @@ export default function CustomOrdersPage() {
                     <div className="space-y-3">
                       <button
                         onClick={() => handleUpdateStatus(order.id, "Accepted")}
-                        disabled={updatingId === order.id}
-                        className="w-full btn-primary py-4 flex items-center justify-center gap-2 rounded-2xl shadow-lg border-0 disabled:opacity-50 disabled:cursor-not-allowed group"
+                        disabled={updatingId === order.id || order.status === "Accepted"}
+                        className={`w-full py-4 flex items-center justify-center gap-2 rounded-2xl shadow-lg border-0 transition-all group ${
+                          order.status === "Accepted"
+                            ? "bg-gray-400 text-white cursor-not-allowed shadow-none"
+                            : "btn-primary shadow-[var(--color-primary)]/20"
+                        }`}
                       >
                         {updatingId === order.id ? (
                           <Loader2 size={18} className="animate-spin" />
+                        ) : order.status === "Accepted" ? (
+                          <>
+                            <CheckCircle2 size={18} />
+                            <span>Accepted</span>
+                          </>
                         ) : (
                           <>
                             <CheckCircle2 size={18} />

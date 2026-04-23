@@ -17,12 +17,12 @@ import {
 } from "lucide-react";
 
 const menuItems = [
-  { name: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
-  { name: "My Orders", icon: ShoppingBag, href: "/dashboard/orders" },
-  { name: "Wishlist", icon: Heart, href: "/dashboard/wishlist" },
-  { name: "Profile", icon: User, href: "/dashboard/profile" },
-  { name: "Addresses", icon: MapPin, href: "/dashboard/addresses" },
-  { name: "Settings", icon: Settings, href: "/dashboard/settings" },
+  { name: "Account", icon: LayoutDashboard, href: "/account" },
+  { name: "My Orders", icon: ShoppingBag, href: "/account/orders" },
+  { name: "Wishlist", icon: Heart, href: "/account/wishlist" },
+  { name: "Profile", icon: User, href: "/account/profile" },
+  { name: "Addresses", icon: MapPin, href: "/account/addresses" },
+  { name: "Settings", icon: Settings, href: "/account/settings" },
 ];
 
 export default function Sidebar() {

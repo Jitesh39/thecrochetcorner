@@ -1,8 +1,28 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, Users, Sparkles, Award } from "lucide-react";
+import { Heart, Users, Sparkles, Award, Loader2 } from "lucide-react";
+import { db } from "@/lib/firebase";
+import { doc, onSnapshot } from "firebase/firestore";
 
 export default function AboutPage() {
+  const [aboutImage, setAboutImage] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, "settings", "about"), (docSnap) => {
+      if (docSnap.exists()) {
+        setAboutImage(docSnap.data().aboutImage || "");
+      }
+      setLoading(false);
+    });
+    return () => unsub();
+  }, []);
+
+  const defaultImage = "https://images.unsplash.com/photo-1623910385973-7740eeb2e250?q=80&w=800";
+
   return (
     <div className="bg-white min-h-screen">
       {/* Hero Section */}
@@ -20,17 +40,22 @@ export default function AboutPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row items-center gap-16">
             <div className="w-full lg:w-1/2 relative">
-              <div className="relative aspect-square rounded-3xl overflow-hidden shadow-2xl z-10">
-                <Image 
-                  src="https://images.unsplash.com/photo-1623910385973-7740eeb2e250?q=80&w=800" 
-                  alt="Crochet artist at work" 
-                  fill 
-                  className="object-cover"
-                />
+              <div className="relative aspect-square rounded-3xl overflow-hidden shadow-2xl z-10 bg-gray-50 flex items-center justify-center">
+                {loading ? (
+                  <Loader2 className="animate-spin text-[var(--color-primary)]" />
+                ) : (
+                  <Image
+                    src={aboutImage || defaultImage}
+                    alt="The Crochet Corner Story"
+                    fill
+                    className="object-cover"
+                    priority
+                  />
+                )}
               </div>
               <div className="absolute -bottom-8 -right-8 w-64 h-64 bg-[var(--color-accent)] rounded-3xl -z-10 hidden md:block opacity-30"></div>
             </div>
-            
+
             <div className="w-full lg:w-1/2">
               <span className="text-[var(--color-primary)] font-medium uppercase tracking-[0.2em] mb-4 block">Crafting Excellence</span>
               <h2 className="text-3xl md:text-5xl font-serif text-[var(--color-text-main)] mb-8 leading-tight">
@@ -76,15 +101,15 @@ export default function AboutPage() {
       <section className="py-24">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-[var(--color-primary)] rounded-[3rem] p-12 md:p-20 text-center text-white relative overflow-hidden shadow-xl">
-             <div className="relative z-10">
-               <h2 className="text-3xl md:text-5xl font-serif mb-8 leading-tight">Ready to bring some handmade warmth into your life?</h2>
-               <Link href="/shop" className="bg-white text-[var(--color-primary)] px-10 py-4 rounded-full font-bold hover:bg-gray-100 transition-colors inline-block text-lg">
-                 Browse Our Collection
-               </Link>
-             </div>
-             {/* Decorative circles */}
-             <div className="absolute top-[-10%] right-[-10%] w-64 h-64 bg-white opacity-5 rounded-full"></div>
-             <div className="absolute bottom-[-20%] left-[-10%] w-96 h-96 bg-white opacity-5 rounded-full"></div>
+            <div className="relative z-10">
+              <h2 className="text-3xl md:text-5xl font-serif mb-8 leading-tight">Ready to bring some handmade warmth into your life?</h2>
+              <Link href="/shop" className="bg-white text-[var(--color-primary)] px-10 py-4 rounded-full font-bold hover:bg-gray-100 transition-colors inline-block text-lg">
+                Browse Our Collection
+              </Link>
+            </div>
+            {/* Decorative circles */}
+            <div className="absolute top-[-10%] right-[-10%] w-64 h-64 bg-white opacity-5 rounded-full"></div>
+            <div className="absolute bottom-[-20%] left-[-10%] w-96 h-96 bg-white opacity-5 rounded-full"></div>
           </div>
         </div>
       </section>

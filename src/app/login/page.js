@@ -65,13 +65,13 @@ export default function LoginPage() {
           role: "user" // Default role
         };
         await setDoc(doc(db, "users", user.uid), userData);
-        router.push("/dashboard");
+        router.push("/account");
       } else {
         const userData = userDoc.data();
         if (userData.role === "admin") {
           router.push("/admin");
         } else {
-          router.push("/dashboard");
+          router.push("/account");
         }
       }
     } catch (err) {
@@ -104,7 +104,7 @@ export default function LoginPage() {
         if (userDoc.exists() && userDoc.data().role === "admin") {
           router.push("/admin");
         } else {
-          router.push("/dashboard");
+          router.push("/account");
         }
       } else {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);

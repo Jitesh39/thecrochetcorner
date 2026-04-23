@@ -1,23 +1,36 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Star, ShoppingBag, ChevronDown, Check } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
 import { db } from "@/lib/firebase";
 import { collection, onSnapshot } from "firebase/firestore";
 
 export default function ShopPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading shop...</div>}>
+      <ShopContent />
+    </Suspense>
+  );
+}
+
+function ShopContent() {
   const [products, setProducts] = useState([]);
+  const [dbCategories, setDbCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  
+  const selectedCategory = searchParams.get("category")?.toLowerCase() || "all";
   const [sortBy, setSortBy] = useState("Featured");
   const [isSortOpen, setIsSortOpen] = useState(false);
   const addItem = useCartStore((state) => state.addItem);
 
   useEffect(() => {
-    const unsub = onSnapshot(collection(db, "products"), (snapshot) => {
+    const unsubProducts = onSnapshot(collection(db, "products"), (snapshot) => {
       const productsData = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
@@ -26,14 +39,36 @@ export default function ShopPage() {
       setLoading(false);
     });
 
-    return () => unsub();
+    const unsubCategories = onSnapshot(collection(db, "categories"), (snapshot) => {
+      const catsData = snapshot.docs.map(doc => ({
+        name: doc.data().name,
+        slug: doc.data().slug || doc.data().name.toLowerCase().replace(/\s+/g, '')
+      }));
+      setDbCategories(catsData);
+    });
+
+    return () => {
+      unsubProducts();
+      unsubCategories();
+    };
   }, []);
 
-  const categories = ["All", "Flowers", "Bouquets", "Gifts", "Accessories"];
+  const categories = [{ name: "All", slug: "all" }, ...dbCategories];
   const sortOptions = ["Featured", "Price: Low to High", "Price: High to Low"];
 
+  const handleCategoryClick = (slug) => {
+    if (slug === "all") {
+      router.push("/shop");
+    } else {
+      router.push(`/shop?category=${slug}`);
+    }
+  };
+
   const filteredProducts = products
-    .filter(p => selectedCategory === "All" || p.category === selectedCategory)
+    .filter(p => {
+      const productCat = p.category?.toLowerCase().replace(/\s+/g, '') || "";
+      return selectedCategory === "all" || productCat === selectedCategory;
+    })
     .sort((a, b) => {
       if (sortBy === "Price: Low to High") return (a.price || 0) - (b.price || 0);
       if (sortBy === "Price: High to Low") return (b.price || 0) - (a.price || 0);
@@ -55,14 +90,14 @@ export default function ShopPage() {
           <div className="flex items-center gap-3 overflow-x-auto no-scrollbar w-full lg:w-auto pb-2 lg:pb-0">
             {categories.map((cat) => (
               <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`whitespace-nowrap px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-300 border ${selectedCategory === cat
-                  ? "bg-[#f4e8e8] text-[var(--color-primary-dark)] border-[#f4e8e8] shadow-sm"
-                  : "bg-white text-gray-500 border-gray-100 hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
+                key={cat.slug}
+                onClick={() => handleCategoryClick(cat.slug)}
+                className={`whitespace-nowrap px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-300 border ${selectedCategory === cat.slug
+                  ? "bg-[#f4e8e8] text-[var(--color-primary-dark)] border-[#f4e8e8] shadow-sm active-category"
+                  : "bg-white text-gray-500 border-gray-100 hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] normal-category"
                   }`}
               >
-                {cat}
+                {cat.name}
               </button>
             ))}
           </div>
@@ -124,7 +159,11 @@ export default function ShopPage() {
                   <div className="flex text-yellow-400">
                     {[...Array(5)].map((_, i) => <Star key={i} size={14} fill="currentColor" />)}
                   </div>
-                  <span className="text-xs text-gray-400 font-medium ml-1">(New Arrival)</span>
+                  {(() => {
+                    const totalOrders = (product.baseOrderCount || 0) + (product.orderCount || 0);
+                    const displayCount = totalOrders > 999 ? (totalOrders / 1000).toFixed(1) + 'k+' : totalOrders;
+                    return <span className="text-xs text-gray-400 font-medium ml-1">({displayCount})</span>;
+                  })()}
                 </div>
                 <button
                   onClick={(e) => {
@@ -145,7 +184,7 @@ export default function ShopPage() {
         {filteredProducts.length === 0 && (
           <div className="py-24 text-center bg-white rounded-[3rem] border border-dashed border-gray-200">
             <p className="text-2xl font-serif text-gray-300">No products found in this category.</p>
-            <button onClick={() => setSelectedCategory("All")} className="mt-6 text-[var(--color-primary)] font-bold underline underline-offset-4">View All Collection</button>
+            <button onClick={() => handleCategoryClick("all")} className="mt-6 text-[var(--color-primary)] font-bold underline underline-offset-4">View All Collection</button>
           </div>
         )}
       </div>

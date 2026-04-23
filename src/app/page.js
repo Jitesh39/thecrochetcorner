@@ -4,11 +4,13 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { db } from "@/lib/firebase";
 import { doc, onSnapshot } from "firebase/firestore";
 import Bestsellers from "@/components/Bestsellers";
 import OurPromise from "@/components/OurPromise";
 import CategorySections from "@/components/CategorySections";
+import NewArrivals from "@/components/NewArrivals";
 import StudioPromotion from "@/components/StudioPromotion";
 
 const defaultImages = [
@@ -154,6 +156,9 @@ export default function Home() {
       {/* Categories Section */}
       <CategorySections />
 
+      {/* New Arrivals Section */}
+      <NewArrivals />
+
       {/* Studio Promotion Section */}
       <StudioPromotion />
 
@@ -169,6 +174,8 @@ export default function Home() {
 function TestimonialsSection() {
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
     const unsub = onSnapshot(doc(db, "settings", "testimonials"), (docSnap) => {
@@ -180,33 +187,137 @@ function TestimonialsSection() {
     return () => unsub();
   }, []);
 
+  useEffect(() => {
+    if (isHovered || entries.length <= 1) return;
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    const intervalTime = isMobile ? 2500 : 3500;
+
+    const interval = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % entries.length);
+    }, intervalTime);
+    return () => clearInterval(interval);
+  }, [isHovered, entries.length]);
+
   if (loading || entries.length === 0) return null;
 
+  const nextSlide = () => setActiveIndex((prev) => (prev + 1) % entries.length);
+  const prevSlide = () => setActiveIndex((prev) => (prev - 1 + entries.length) % entries.length);
+
   return (
-    <section className="py-24 bg-[var(--color-secondary)]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-24 bg-[#faf9f8] overflow-hidden">
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+      >
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-5xl font-serif text-[var(--color-text-main)] mb-4 font-bold">Happy Customers</h2>
           <p className="text-[var(--color-text-muted)] italic">"What they say about our handmade creations"</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {entries.map((testimonial, i) => (
-            <div key={i} className="bg-white p-10 rounded-[2.5rem] shadow-sm border border-gray-100 flex flex-col transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-              <div className="flex gap-1 mb-8 text-yellow-400">
-                {[...Array(testimonial.rating || 5)].map((_, star) => (
-                  <svg key={star} className="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                ))}
-              </div>
-              <p className="text-[var(--color-text-main)] italic mb-10 leading-relaxed font-medium">"{testimonial.text}"</p>
-              <div className="mt-auto">
-                <h4 className="font-serif font-bold text-[var(--color-text-main)] text-xl">{testimonial.name}</h4>
-                <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-[0.2em] mt-2 font-bold">{testimonial.product}</p>
-              </div>
+        <div
+          className="relative max-w-5xl mx-auto flex flex-col items-center"
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
+          {/* Slider Container */}
+          <div className="relative w-full h-[400px] flex justify-center items-center">
+            {entries.map((testimonial, i) => {
+              let diff = i - activeIndex;
+              if (diff > Math.floor(entries.length / 2)) diff -= entries.length;
+              if (diff < -Math.floor(entries.length / 2)) diff += entries.length;
+
+              const isActive = diff === 0;
+
+              return (
+                <motion.div
+                  key={i}
+                  animate={{
+                    x: `calc(${diff * 110}%)`,
+                    scale: isActive ? 1 : 0.9,
+                    opacity: isActive ? 1 : (Math.abs(diff) === 1 ? 0.4 : 0),
+                    zIndex: isActive ? 10 : 1,
+                  }}
+                  transition={{ duration: 0.4, ease: "easeInOut" }}
+                  className="absolute top-0 w-[85%] max-w-[350px] h-[360px]"
+                  style={{ pointerEvents: Math.abs(diff) <= 1 ? "auto" : "none", willChange: "transform, opacity" }}
+                  onClick={() => setActiveIndex(i)}
+                  whileHover={isActive ? { y: -8 } : {}}
+                  drag="x"
+                  dragConstraints={{ left: 0, right: 0 }}
+                  dragElastic={0.2}
+                  onDragEnd={(e, { offset, velocity }) => {
+                    const swipe = offset.x;
+                    if (swipe < -40) {
+                      nextSlide();
+                    } else if (swipe > 40) {
+                      prevSlide();
+                    }
+                  }}
+                >
+                  <div className="bg-white w-full h-full rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 p-8 flex flex-col items-center text-center relative overflow-hidden group">
+                    {/* Decorative Corner Accents */}
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-red-50/50 rounded-bl-[4rem] -z-0 transition-transform duration-500 group-hover:scale-110"></div>
+                    <div className="absolute bottom-0 left-0 w-24 h-24 bg-red-50/50 rounded-tr-[4rem] -z-0 transition-transform duration-500 group-hover:scale-110"></div>
+
+                    {/* Image */}
+                    <div className="relative w-20 h-20 rounded-full border-4 border-white shadow-md overflow-hidden mb-4 z-10 flex-shrink-0 bg-red-100">
+                      <Image
+                        src={testimonial.imageUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${testimonial.name}&backgroundColor=fca5a5,fcd34d,f87171`}
+                        alt={testimonial.name}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+
+                    <h4 className="font-serif font-bold text-[var(--color-text-main)] text-xl mb-1 z-10">{testimonial.name}</h4>
+                    <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-[0.2em] font-bold mb-4 z-10">{testimonial.product}</p>
+
+                    <p className="text-gray-600 italic mb-auto leading-relaxed text-sm z-10 line-clamp-4 px-2">"{testimonial.text}"</p>
+
+                    <div className="flex gap-1 mt-6 text-yellow-400 z-10">
+                      {[...Array(testimonial.rating || 5)].map((_, star) => (
+                        <svg key={star} className="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+
+          {/* Navigation Controls */}
+          <div className="flex items-center gap-6 mt-8">
+            <button
+              onClick={prevSlide}
+              className="w-12 h-12 rounded-full bg-white border border-gray-100 shadow-sm flex items-center justify-center text-[var(--color-text-main)] hover:bg-[var(--color-primary)] hover:text-white hover:border-[var(--color-primary)] transition-all active:scale-90"
+            >
+              <ChevronLeft size={20} />
+            </button>
+
+            {/* Dots */}
+            <div className="flex gap-2">
+              {entries.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setActiveIndex(i)}
+                  className={`h-2 rounded-full transition-all duration-500 ${activeIndex === i ? "w-8 bg-[var(--color-primary)]" : "w-2 bg-gray-200 hover:bg-gray-300"}`}
+                />
+              ))}
             </div>
-          ))}
+
+            <button
+              onClick={nextSlide}
+              className="w-12 h-12 rounded-full bg-white border border-gray-100 shadow-sm flex items-center justify-center text-[var(--color-text-main)] hover:bg-[var(--color-primary)] hover:text-white hover:border-[var(--color-primary)] transition-all active:scale-90"
+            >
+              <ChevronRight size={20} />
+            </button>
+          </div>
+
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }

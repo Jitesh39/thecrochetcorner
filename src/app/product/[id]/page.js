@@ -171,8 +171,13 @@ export default function ProductDetailPage() {
               <span className="px-3 py-1 bg-[var(--color-secondary)] text-[var(--color-primary)] text-[10px] font-bold uppercase tracking-widest rounded-full">
                 {product.category || "Handmade"}
               </span>
-              <div className="flex text-yellow-400">
+              <div className="flex items-center gap-1 text-yellow-400">
                 {[...Array(5)].map((_, i) => <Star key={i} size={12} fill="currentColor" />)}
+                {(() => {
+                  const totalOrders = (product.baseOrderCount || 0) + (product.orderCount || 0);
+                  const displayCount = totalOrders > 999 ? (totalOrders / 1000).toFixed(1) + 'k+' : totalOrders;
+                  return <span className="text-xs text-gray-400 font-medium ml-1">({displayCount})</span>;
+                })()}
               </div>
             </div>
 
