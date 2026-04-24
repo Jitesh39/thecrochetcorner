@@ -69,10 +69,10 @@ export default function CheckoutPage() {
     }
 
     setPlacing(true);
-    
+
     try {
       const orderId = `ORD-${Date.now()}`;
-      
+
       // 1. Prepare Order Data
       const orderData = {
         orderId: orderId,
@@ -110,7 +110,7 @@ export default function CheckoutPage() {
 
       // 2. Save to Firestore (Atomic Batch Approach)
       const batch = writeBatch(db);
-      
+
       // Create Order
       const newOrderRef = doc(collection(db, "orders"));
       batch.set(newOrderRef, orderData);
@@ -269,7 +269,7 @@ export default function CheckoutPage() {
                 {items.map((item) => (
                   <div key={item.id} className="flex gap-4">
                     <div className="relative w-16 h-16 rounded-xl bg-gray-50 overflow-hidden flex-shrink-0 border border-gray-100">
-                      <Image src={item.image || item.imageUrl || (item.images && item.images[0]) || "/img1.png"} alt={item.name} fill className="object-cover" />
+                      <Image src={item.image || item.imageUrl || (item.images && item.images[0]) || "/img1.png"} alt={item.name} fill className="object-contain" />
                       <span className="absolute -top-1 -right-1 bg-gray-800 text-white text-[9px] font-bold h-5 w-5 rounded-full flex items-center justify-center border-2 border-white">
                         {item.quantity}
                       </span>

@@ -65,7 +65,7 @@ export default function CartPage() {
                       src={item.imageUrl || item.image || (item.images && item.images[0]) || "/img1.png"}
                       alt={item.name}
                       fill
-                      className="object-cover"
+                      className="object-contain"
                     />
                   </div>
 
@@ -73,7 +73,7 @@ export default function CartPage() {
                     <div className="text-[10px] uppercase tracking-widest text-[var(--color-text-muted)] mb-1">
                       {item.category}
                     </div>
-                    <Link href={`/product/${item.id}`} className="text-lg font-serif text-[var(--color-text-main)] hover:text-[var(--color-primary)] transition-colors mb-2">
+                    <Link href={`/product/${item.productId || item.id}`} className="text-lg font-serif text-[var(--color-text-main)] hover:text-[var(--color-primary)] transition-colors mb-2">
                       {item.name}
                     </Link>
                     <p className="text-[var(--color-text-main)] font-medium mb-4 sm:mb-0">

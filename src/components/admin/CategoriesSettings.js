@@ -10,6 +10,7 @@ export default function CategoriesSettings() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [newCategoryName, setNewCategoryName] = useState("");
+  const [newCategoryCode, setNewCategoryCode] = useState("");
   const [adding, setAdding] = useState(false);
   const [products, setProducts] = useState([]);
 
@@ -34,10 +35,21 @@ export default function CategoriesSettings() {
   const handleAddCategory = async (e) => {
     e.preventDefault();
     const name = newCategoryName.trim();
-    if (!name) return;
+    const code = newCategoryCode.trim().toUpperCase();
+    if (!name || !code) return;
+
+    if (code.length !== 3 || !/^[A-Z]+$/.test(code)) {
+      toast.error("Category code must be exactly 3 uppercase letters");
+      return;
+    }
 
     if (categories.some(c => c.name.toLowerCase() === name.toLowerCase())) {
       toast.error("Category with this name already exists");
+      return;
+    }
+
+    if (categories.some(c => c.code === code)) {
+      toast.error("Category with this code already exists");
       return;
     }
 
@@ -47,10 +59,12 @@ export default function CategoriesSettings() {
       await addDoc(collection(db, "categories"), {
         name,
         slug,
+        code,
         createdAt: serverTimestamp()
       });
       toast.success("Category added successfully");
       setNewCategoryName("");
+      setNewCategoryCode("");
     } catch (err) {
       console.error(err);
       toast.error("Failed to add category");
@@ -114,7 +128,18 @@ export default function CategoriesSettings() {
                 required
               />
             </div>
-            
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1">Category Code (3 letters)</label>
+              <input
+                type="text"
+                value={newCategoryCode}
+                onChange={(e) => setNewCategoryCode(e.target.value.toUpperCase().slice(0, 3).replace(/[^A-Z]/g, ''))}
+                placeholder="e.g. FLO"
+                className="w-full bg-gray-50 border border-transparent rounded-xl p-4 text-sm font-medium text-gray-700 focus:bg-white focus:border-[var(--color-primary)] transition-all outline-none"
+                maxLength={3}
+                required
+              />
+            </div>
             <button
               type="submit"
               disabled={adding || !newCategoryName.trim()}
@@ -144,9 +169,14 @@ export default function CategoriesSettings() {
             ) : (
               categories.map((category) => (
                 <div key={category.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100 group hover:border-[var(--color-primary)]/30 transition-all">
-                  <div>
-                    <h3 className="font-bold text-gray-800">{category.name}</h3>
-                    <p className="text-[10px] text-gray-400 uppercase tracking-widest mt-1">/{category.slug}</p>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)] font-bold text-xs">
+                      {category.code || category.name.slice(0, 3).toUpperCase()}
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-gray-800">{category.name}</h3>
+                      <p className="text-[10px] text-gray-400 uppercase tracking-widest mt-0.5">/{category.slug}</p>
+                    </div>
                   </div>
                   <button
                     onClick={() => handleDeleteCategory(category.id, category.name)}

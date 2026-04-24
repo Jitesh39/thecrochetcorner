@@ -65,7 +65,7 @@ export default function CustomOrdersPage() {
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex flex-col gap-1">
         <h1 className="text-2xl font-bold text-gray-800 tracking-tight">Custom Order Management</h1>
         <p className="text-sm text-gray-400 font-medium">Review and manage personalized order requests.</p>

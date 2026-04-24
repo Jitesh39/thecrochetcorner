@@ -15,7 +15,7 @@ export default function Bestsellers() {
   const addItem = useCartStore((state) => state.addItem);
 
   useEffect(() => {
-    const q = query(collection(db, "products"), limit(3));
+    const q = query(collection(db, "products"), limit(6));
     const unsub = onSnapshot(q, (snapshot) => {
       const productsData = snapshot.docs.map(doc => ({
         id: doc.id,
@@ -29,24 +29,24 @@ export default function Bestsellers() {
   }, []);
 
   return (
-    <section className="w-full px-3 sm:px-4 lg:px-8 py-6 sm:py-10 bg-[#f5f1ed]">
+    <section className="w-full px-6 sm:px-12 lg:px-20 py-4 sm:py-8 bg-[#f5f1ed]">
       <div className="w-full">
         {/* Section Header */}
         <div className="text-center mb-6 sm:mb-8 lg:mb-12">
-          <h2 className="text-3xl md:text-5xl font-serif text-[var(--color-text-main)] mb-3 font-bold">
+          <h2 className="text-2xl md:text-4xl font-serif text-[var(--color-text-main)] mb-3 font-bold">
             Bestselling Products
           </h2>
           <div className="h-1 w-20 bg-[var(--color-primary)] mx-auto rounded-full"></div>
         </div>
 
         {/* Product Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 px-1 sm:px-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 px-1 sm:px-2">
           {loading ? (
             <div className="col-span-full py-20 text-center font-bold text-gray-400">Syncing latest products...</div>
           ) : products.map((product) => (
             <Link
               key={product.id}
-              href={`/product/${product.id}`}
+              href={`/product/${product.productId || product.id}`}
               className="group bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-500 overflow-hidden flex flex-col h-full cursor-pointer relative w-full max-w-[380px] mx-auto"
             >
               {/* Product Image Area */}
@@ -60,7 +60,7 @@ export default function Bestsellers() {
                     src={product.imageUrl || "/img1.png"}
                     alt={product.name}
                     fill
-                    className="object-cover"
+                    className="object-contain"
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   />
                 </div>

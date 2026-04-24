@@ -67,17 +67,17 @@ export default function NotificationsPage() {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
           <h1 className="text-2xl font-bold text-gray-800 tracking-tight">Admin Notifications</h1>
           <p className="text-sm text-gray-400 font-medium">Keep track of new orders and activity.</p>
         </div>
-        <button 
+        <button
           onClick={handleMarkAllRead}
           className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-100 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all shadow-sm"
         >
-           Mark All as Read
+          Mark All as Read
         </button>
       </div>
 
@@ -94,8 +94,8 @@ export default function NotificationsPage() {
           </div>
         ) : (
           notifications.map((notification) => (
-            <div 
-              key={notification.id} 
+            <div
+              key={notification.id}
               className={`bg-white rounded-3xl p-6 sm:p-8 shadow-sm border ${notification.isRead ? "border-gray-50" : "border-blue-100 ring-1 ring-blue-50"} transition-all hover:shadow-md`}
             >
               <div className="flex flex-col md:flex-row gap-6 md:items-center">
@@ -124,7 +124,7 @@ export default function NotificationsPage() {
 
                 <div className="flex items-center gap-2 shrink-0 self-end md:self-center">
                   {!notification.isRead && !notification.isAccepted && (
-                    <button 
+                    <button
                       onClick={() => handleMarkAsRead(notification.id)}
                       className="p-3 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-2xl transition-all"
                       title="Mark as Read"
@@ -137,7 +137,7 @@ export default function NotificationsPage() {
                       <CheckCircle size={16} /> Accepted
                     </div>
                   ) : (
-                    <button 
+                    <button
                       disabled={actionId === notification.id}
                       onClick={() => handleAcceptOrder(notification.id, notification.orderId)}
                       className="flex items-center gap-2 px-6 py-3 bg-[var(--color-primary)] text-white rounded-2xl text-xs font-bold uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-md shadow-[var(--color-primary)]/10 disabled:opacity-50"

@@ -61,11 +61,11 @@ export default function PendingOrdersPage() {
   const handleProcessOrder = async (orderId) => {
     // Prevent double processing
     if (processingId === orderId) return;
-    
+
     setProcessingId(orderId);
     try {
       const orderRef = doc(db, "orders", orderId);
-      
+
       // Optimistic status update (optional but good for UX)
       setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: "Accepted" } : o));
 
@@ -113,7 +113,7 @@ export default function PendingOrdersPage() {
   }
 
   return (
-    <div className="space-y-8 animate-in slide-in-from-bottom duration-500">
+    <div className="space-y-6 animate-in slide-in-from-bottom duration-500">
       <div className="flex flex-col gap-1">
         <h1 className="text-2xl font-bold text-gray-800 tracking-tight">Pending Orders</h1>
         <p className="text-sm text-gray-400 font-medium">Orders that require your immediate attention.</p>
@@ -142,11 +142,10 @@ export default function PendingOrdersPage() {
                 <button
                   onClick={() => handleProcessOrder(order.id)}
                   disabled={processingId === order.id || order.status === "Accepted"}
-                  className={`flex-1 py-2.5 rounded-xl text-white text-xs font-bold transition-all flex items-center justify-center gap-2 ${
-                    order.status === "Accepted"
+                  className={`flex-1 py-2.5 rounded-xl text-white text-xs font-bold transition-all flex items-center justify-center gap-2 ${order.status === "Accepted"
                       ? "bg-gray-400 cursor-not-allowed"
                       : "bg-orange-500 hover:bg-orange-600 disabled:opacity-50"
-                  }`}
+                    }`}
                 >
                   {processingId === order.id ? (
                     <Loader2 size={14} className="animate-spin" />

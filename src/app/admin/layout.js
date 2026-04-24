@@ -120,7 +120,7 @@ export default function AdminLayout({ children }) {
             <div className="h-8 w-px bg-gray-100 mx-1 hidden sm:block"></div>
 
             <div className="relative">
-              <button 
+              <button
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
                 className="flex items-center gap-3 pl-2 hover:bg-gray-50 p-1.5 rounded-2xl transition-all group active:scale-95"
               >
@@ -147,18 +147,18 @@ export default function AdminLayout({ children }) {
                       <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Signed in as</p>
                       <p className="text-sm font-bold text-gray-800 truncate">{adminProfile.name}</p>
                     </div>
-                    
-                    <Link 
-                      href="/admin/profile" 
+
+                    <Link
+                      href="/admin/profile"
                       onClick={() => setIsProfileOpen(false)}
                       className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-[var(--color-primary)] transition-all"
                     >
                       <User size={18} />
                       View Profile
                     </Link>
-                    
-                    <Link 
-                      href="/admin/settings" 
+
+                    <Link
+                      href="/admin/settings"
                       onClick={() => {
                         setIsProfileOpen(false);
                         // Optional: trigger specific section if needed
@@ -170,8 +170,8 @@ export default function AdminLayout({ children }) {
                     </Link>
 
                     <div className="h-px bg-gray-50 my-1"></div>
-                    
-                    <button 
+
+                    <button
                       onClick={handleLogout}
                       className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-red-500 hover:bg-red-50 transition-all"
                     >
@@ -196,7 +196,7 @@ export default function AdminLayout({ children }) {
 
       {/* Main Content Area - Offset by header and sidebar */}
       <div className="lg:pl-[250px] pt-16 transition-all duration-300">
-        <main className="px-4 sm:px-8 py-4 sm:py-6 max-w-7xl mx-auto min-h-[calc(100vh-64px)]">
+        <main className="px-4 sm:px-8 pt-0 pb-10 max-w-7xl mx-auto min-h-[calc(100vh-64px)]">
           {children}
         </main>
       </div>

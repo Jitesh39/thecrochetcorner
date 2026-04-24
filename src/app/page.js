@@ -13,10 +13,10 @@ import CategorySections from "@/components/CategorySections";
 import NewArrivals from "@/components/NewArrivals";
 import StudioPromotion from "@/components/StudioPromotion";
 
-const defaultImages = [
-  "https://images.unsplash.com/photo-1615598696883-7be1a224fe81?q=80&w=1600&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?q=80&w=1600&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1605338661642-cc019ba2f9ec?q=80&w=1600&auto=format&fit=crop"
+const heroImages = [
+  "/img1.png",
+  "/img1.png",
+  "/img1.png"
 ];
 
 const defaultTypingLines = [
@@ -59,7 +59,7 @@ function Typewriter({ texts }) {
 }
 
 export default function Home() {
-  const [images, setImages] = useState(defaultImages);
+  const [images, setImages] = useState(heroImages);
   const [typingLines, setTypingLines] = useState(defaultTypingLines);
   const [currentImage, setCurrentImage] = useState(0);
 
@@ -85,15 +85,18 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen overflow-x-hidden">
       {/* Hero Section */}
-      <section className="relative h-[70vh] sm:h-[80vh] lg:h-[90vh] flex items-center justify-center bg-gray-900 overflow-hidden -mt-[1px] pt-0">
+      <section className="relative h-[60vh] sm:h-[70vh] lg:h-[80vh] flex items-center justify-center bg-gray-900 overflow-hidden -mt-[1px] pt-0">
         {/* Background Slider */}
-        <AnimatePresence mode="wait">
+        <AnimatePresence>
           <motion.div
             key={currentImage}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            initial={{ opacity: 0, scale: 1.1 }}
+            animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 1.5 }}
+            transition={{
+              opacity: { duration: 1.2, ease: "easeInOut" },
+              scale: { duration: 6, ease: "linear" }
+            }}
             className="absolute inset-0"
           >
             <Image
@@ -115,22 +118,22 @@ export default function Home() {
           transition={{ duration: 0.8, delay: 0.5 }}
           className="relative z-10 text-center px-4 w-full flex flex-col items-center"
         >
-          <h1 className="text-4xl md:text-7xl font-serif font-bold text-white mb-4 sm:mb-6 leading-tight drop-shadow-lg max-w-4xl mx-auto">
+          <h1 className="text-3xl md:text-6xl font-serif font-bold text-white mb-4 sm:mb-6 leading-tight drop-shadow-lg max-w-4xl mx-auto">
             Cozy Crochet Creations
           </h1>
-          <div className="text-lg md:text-2xl text-white/90 mb-6 sm:mb-8 lg:mb-10 font-medium h-[3em] flex items-center justify-center">
+          <div className="text-base md:text-xl text-white/90 mb-6 sm:mb-8 lg:mb-10 font-medium h-[3em] flex items-center justify-center">
             <Typewriter texts={typingLines} />
           </div>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center w-full sm:w-auto px-4 sm:px-0">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center w-full sm:w-auto px-4 sm:px-0">
             <Link
               href="/shop"
-              className="w-full sm:w-auto px-10 py-4 bg-[var(--color-primary)] text-white rounded-full font-bold shadow-xl shadow-[var(--color-primary)]/20 hover:scale-105 active:scale-95 transition-all text-center whitespace-nowrap cursor-pointer"
+              className="min-w-[150px] sm:min-w-0 sm:w-auto px-8 py-2.5 sm:px-10 sm:py-3.5 text-sm sm:text-base bg-[var(--color-primary)] text-white rounded-full font-bold shadow-xl shadow-[var(--color-primary)]/20 hover:scale-105 active:scale-95 transition-all text-center whitespace-nowrap cursor-pointer"
             >
               Shop Now
             </Link>
             <Link
               href="/custom"
-              className="w-full sm:w-auto px-10 py-4 bg-white/10 backdrop-blur-md border-2 border-white/30 text-white rounded-full font-bold hover:bg-white hover:text-gray-900 transition-all text-center whitespace-nowrap cursor-pointer shadow-lg"
+              className="min-w-[150px] sm:min-w-0 sm:w-auto px-8 py-2.5 sm:px-10 sm:py-3.5 text-sm sm:text-base bg-white/10 backdrop-blur-md border-2 border-white/30 text-white rounded-full font-bold hover:bg-white hover:text-gray-900 transition-all text-center whitespace-nowrap cursor-pointer shadow-lg"
             >
               Custom Order
             </Link>
@@ -204,7 +207,7 @@ function TestimonialsSection() {
   const prevSlide = () => setActiveIndex((prev) => (prev - 1 + entries.length) % entries.length);
 
   return (
-    <section className="w-full px-3 sm:px-4 lg:px-8 py-10 sm:py-16 bg-[#faf9f8] overflow-hidden">
+    <section className="w-full px-6 sm:px-12 lg:px-20 py-6 sm:py-10 bg-[#faf9f8] overflow-hidden">
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -212,9 +215,9 @@ function TestimonialsSection() {
         transition={{ duration: 0.8, ease: "easeOut" }}
         className="w-full"
       >
-        <div className="text-center mb-8 sm:mb-12 lg:mb-16">
-          <h2 className="text-3xl md:text-5xl font-serif text-[var(--color-text-main)] mb-4 font-bold">Happy Customers</h2>
-          <p className="text-[var(--color-text-muted)] italic">"What they say about our handmade creations"</p>
+        <div className="text-center mb-6 sm:mb-8 lg:mb-10">
+          <h2 className="text-2xl md:text-4xl font-serif text-[var(--color-text-main)] mb-3 font-bold">Happy Customers</h2>
+          <p className="text-sm text-[var(--color-text-muted)] italic">"What they say about our handmade creations"</p>
         </div>
 
         <div
@@ -223,7 +226,7 @@ function TestimonialsSection() {
           onMouseLeave={() => setIsHovered(false)}
         >
           {/* Slider Container */}
-          <div className="relative w-full h-[400px] flex justify-center items-center">
+          <div className="relative w-full h-[350px] flex justify-center items-center">
             {entries.map((testimonial, i) => {
               let diff = i - activeIndex;
               if (diff > Math.floor(entries.length / 2)) diff -= entries.length;
@@ -292,7 +295,7 @@ function TestimonialsSection() {
           <div className="flex items-center gap-6 mt-8">
             <button
               onClick={prevSlide}
-              className="w-12 h-12 rounded-full bg-white border border-gray-100 shadow-sm flex items-center justify-center text-[var(--color-text-main)] hover:bg-[var(--color-primary)] hover:text-white hover:border-[var(--color-primary)] transition-all active:scale-90"
+              className="w-8 h-8 rounded-full bg-white border border-gray-100 shadow-sm flex items-center justify-center text-[var(--color-text-main)] hover:bg-[var(--color-primary)] hover:text-white hover:border-[var(--color-primary)] transition-all active:scale-90"
             >
               <ChevronLeft size={20} />
             </button>
@@ -310,7 +313,7 @@ function TestimonialsSection() {
 
             <button
               onClick={nextSlide}
-              className="w-12 h-12 rounded-full bg-white border border-gray-100 shadow-sm flex items-center justify-center text-[var(--color-text-main)] hover:bg-[var(--color-primary)] hover:text-white hover:border-[var(--color-primary)] transition-all active:scale-90"
+              className="w-8 h-8 rounded-full bg-white border border-gray-100 shadow-sm flex items-center justify-center text-[var(--color-text-main)] hover:bg-[var(--color-primary)] hover:text-white hover:border-[var(--color-primary)] transition-all active:scale-90"
             >
               <ChevronRight size={20} />
             </button>

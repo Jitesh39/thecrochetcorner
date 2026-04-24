@@ -10,6 +10,7 @@ import { db } from "@/lib/firebase";
 import { collection, onSnapshot } from "firebase/firestore";
 import toast from "react-hot-toast";
 import { motion } from "framer-motion";
+import { ShoppingBag } from "lucide-react";
 
 export default function CategorySections() {
   const [products, setProducts] = useState([]);
@@ -67,14 +68,14 @@ export default function CategorySections() {
   }).filter(cat => cat.products.length > 0);
 
   return (
-    <section className="w-full px-3 sm:px-4 lg:px-8 py-8 sm:py-16 bg-[#faf9f8] overflow-hidden">
+    <section className="w-full px-6 sm:px-12 lg:px-20 py-6 sm:py-12 bg-[#faf9f8] overflow-hidden">
       <div className="w-full">
         {/* Main Header */}
-        <div className="text-center mb-10 sm:mb-20 animate-fade-in px-4">
+        <div className="text-center mb-8 sm:mb-14 animate-fade-in px-4">
           <span className="text-[var(--color-primary)] font-medium text-[10px] uppercase tracking-[0.4em] mb-4 block">
             BROWSE BY CATEGORY
           </span>
-          <h2 className="text-3xl md:text-6xl font-serif font-bold text-[var(--color-text-main)] mb-4 leading-tight">
+          <h2 className="text-2xl md:text-5xl font-serif font-bold text-[var(--color-text-main)] mb-4 leading-tight">
             Shop By Category
           </h2>
           <div className="h-0.5 w-16 bg-[var(--color-primary)] mx-auto mt-6 opacity-30"></div>
@@ -88,7 +89,7 @@ export default function CategorySections() {
             <div key={idx} className="animate-slide-up">
               {/* Section Header */}
               <div className="flex justify-between items-end mb-4 sm:mb-6 border-b border-gray-100 pb-2">
-                <h3 className="text-2xl md:text-4xl font-serif font-bold text-[var(--color-text-main)] transition-colors hover:text-[var(--color-primary)] cursor-default">
+                <h3 className="text-xl md:text-3xl font-serif font-bold text-[var(--color-text-main)] transition-colors hover:text-[var(--color-primary)] cursor-default">
                   {cat.title}
                 </h3>
                 <Link
@@ -99,22 +100,22 @@ export default function CategorySections() {
                 </Link>
               </div>
 
-              {/* Product Grid / Horizontal Scroll */}
-              <div className="flex overflow-x-auto gap-4 px-3 pb-4 scrollbar-hide sm:grid sm:grid-cols-3 lg:grid-cols-4 sm:px-2">
+              {/* Product Grid - Exactly 5 items on desktop */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 px-1 sm:px-2">
                 {cat.products.map((product) => (
                   <Link
                     key={product.id}
-                    href={`/product/${product.id}`}
-                    className="min-w-[48%] sm:min-w-0 group bg-[#f5f1ed]/50 hover:bg-white rounded-xl p-3 sm:p-5 transition-all duration-500 shadow-sm hover:shadow-xl border border-transparent hover:border-gray-50 flex flex-col h-full flex-shrink-0"
+                    href={`/product/${product.productId || product.id}`}
+                    className="group bg-[#f5f1ed]/50 hover:bg-white rounded-xl p-3 sm:p-5 transition-all duration-500 shadow-sm hover:shadow-xl border border-transparent hover:border-gray-50 flex flex-col h-full"
                   >
                     {/* Image Area */}
-                    <div className="relative w-full h-[140px] sm:h-[260px] rounded-lg overflow-hidden mb-3 bg-gray-50 flex items-center justify-center group-hover:bg-white transition-colors">
+                    <div className="relative w-full h-[130px] sm:h-[240px] rounded-lg overflow-hidden mb-3 bg-gray-50 flex items-center justify-center group-hover:bg-white transition-colors">
                       <div className="relative w-full h-full transition-transform duration-700 group-hover:scale-110">
                         <Image
                           src={product.imageUrl || "/img1.png"}
                           alt={product.name}
                           fill
-                          className="object-cover"
+                          className="object-contain"
                           sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                         />
                       </div>
@@ -141,9 +142,10 @@ export default function CategorySections() {
                             e.stopPropagation();
                             addItem(product);
                           }}
-                          className="w-full mt-1 text-[10px] sm:text-xs font-bold border border-gray-200 py-1.5 rounded-md hover:bg-[var(--color-primary)] hover:text-white hover:border-[var(--color-primary)] transition-all"
+                          className="w-[90%] mx-auto mt-1 flex items-center justify-center gap-2 text-[10px] sm:text-xs font-bold border border-gray-200 py-1.5 rounded-xl hover:bg-[var(--color-primary)] hover:text-white hover:border-[var(--color-primary)] transition-all"
                         >
-                          Add
+                          <ShoppingBag size={18} strokeWidth={2.5} />
+                          Add to Cart
                         </button>
                       </div>
                     </div>

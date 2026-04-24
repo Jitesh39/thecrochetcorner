@@ -69,7 +69,7 @@ export default function Footer() {
 
   return (
     <footer className={`${isProductPage ? "hidden lg:block" : ""} bg-white border-t border-[var(--color-secondary)] pt-12 pb-8`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full px-6 sm:px-12 lg:px-20">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           <div className="col-span-1 sm:col-span-2 lg:col-span-1">
             <Link href="/" className="inline-block mb-4">
@@ -116,8 +116,8 @@ export default function Footer() {
             <ul className="space-y-3 text-sm text-[var(--color-text-muted)]">
               <li><a href="#" onClick={handleAccountClick} className="hover:text-[var(--color-primary)] transition-colors">My Account</a></li>
               <li><Link href="/shipping" className="hover:text-[var(--color-primary)] transition-colors">Shipping & Returns</Link></li>
-              <li><Link href="/terms" className="hover:text-[var(--color-primary)] transition-colors">Terms & Conditions</Link></li>
-              <li><Link href="/privacy" className="hover:text-[var(--color-primary)] transition-colors">Privacy Policy</Link></li>
+              <li><Link href="/terms-conditions" className="hover:text-[var(--color-primary)] transition-colors">Terms & Conditions</Link></li>
+              <li><Link href="/privacy-policy" className="hover:text-[var(--color-primary)] transition-colors">Privacy Policy</Link></li>
             </ul>
           </div>
         </div>

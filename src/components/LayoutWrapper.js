@@ -18,10 +18,10 @@ export default function LayoutWrapper({ children }) {
     <>
       {!isAdminPage && <MobileHeader />}
       {!isAdminPage && <MobileUserNav />}
-      <Navbar />
+      {!isAdminPage && <Navbar />}
       <CartDrawer />
       <ScrollToTop />
-      <main className="w-full px-3 sm:px-4 md:px-6 lg:px-8 flex-grow min-h-screen pt-[60px] lg:pt-0">
+      <main className={`w-full flex-grow min-h-screen ${!isAdminPage && pathname !== '/' && pathname !== '/about' ? 'px-3 sm:px-4 md:px-6 lg:px-8' : ''} ${!isAdminPage ? 'pt-[60px]' : ''} lg:pt-0`}>
         {children}
       </main>
       {!isAdminPage && <Footer />}

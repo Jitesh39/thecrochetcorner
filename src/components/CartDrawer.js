@@ -121,7 +121,7 @@ export default function CartDrawer() {
                         src={item.imageUrl || item.image || (item.images && item.images[0]) || "/img1.png"}
                         alt={item.name}
                         fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                        className="object-contain transition-transform duration-500 group-hover:scale-110"
                       />
                     </div>
 
@@ -129,7 +129,7 @@ export default function CartDrawer() {
                     <div className="flex-1 min-w-0 flex flex-col py-1">
                       <div className="flex justify-between items-start mb-0.5">
                         <Link
-                          href={`/product/${item.id}`}
+                          href={`/product/${item.productId || item.id}`}
                           onClick={closeDrawer}
                           className="text-sm font-bold text-[var(--color-text-main)] truncate pr-4 hover:text-[var(--color-primary)] transition-colors leading-tight"
                         >

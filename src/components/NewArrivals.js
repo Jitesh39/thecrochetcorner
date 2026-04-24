@@ -34,7 +34,7 @@ export default function NewArrivals() {
   }, []);
 
   return (
-    <section className="w-full px-3 sm:px-4 lg:px-8 py-8 sm:py-16 bg-[#faf9f8] overflow-hidden">
+    <section className="w-full px-6 sm:px-12 lg:px-20 py-6 sm:py-12 bg-[#faf9f8] overflow-hidden">
       <div className="w-full">
 
         {/* Header Section */}
@@ -43,7 +43,7 @@ export default function NewArrivals() {
             <span className="text-[var(--color-primary)] font-medium text-[10px] uppercase tracking-[0.4em] mb-4 block">
               JUST IN
             </span>
-            <h2 className="text-3xl md:text-5xl font-serif font-bold text-[var(--color-text-main)] mb-4 leading-tight">
+            <h2 className="text-2xl md:text-4xl font-serif font-bold text-[var(--color-text-main)] mb-4 leading-tight">
               New Arrivals
             </h2>
             <div className="h-0.5 w-16 bg-[var(--color-primary)] mx-auto mt-6 opacity-30 lg:hidden"></div>
@@ -70,17 +70,17 @@ export default function NewArrivals() {
               {products.map((product, idx) => (
                 <Link
                   key={product.id}
-                  href={`/product/${product.id}`}
+                  href={`/product/${product.productId || product.id}`}
                   className={`group bg-[#f5f1ed]/50 hover:bg-white rounded-xl p-4 sm:p-5 transition-all duration-500 shadow-sm hover:shadow-xl border border-transparent hover:border-gray-50 flex-col h-full transform hover:-translate-y-1 cursor-pointer relative flex w-full max-w-[380px] mx-auto`}
                 >
                   {/* Image Area */}
-                  <div className="relative w-full h-[260px] sm:h-[300px] rounded-lg overflow-hidden mb-4 bg-gray-50 flex items-center justify-center group-hover:bg-white transition-colors">
+                  <div className="relative w-full h-[220px] sm:h-[260px] rounded-lg overflow-hidden mb-4 bg-gray-50 flex items-center justify-center group-hover:bg-white transition-colors">
                     <div className="relative w-full h-full transition-transform duration-700 group-hover:scale-110">
                       <Image
                         src={product.imageUrl || "/img1.png"}
                         alt={product.name}
                         fill
-                        className="object-cover"
+                        className="object-contain"
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       />
                     </div>

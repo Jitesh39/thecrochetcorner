@@ -15,19 +15,21 @@ import {
   LogOut,
   X
 } from "lucide-react";
-
-const menuItems = [
-  { name: "Account", icon: LayoutDashboard, href: "/account" },
-  { name: "My Orders", icon: ShoppingBag, href: "/account/orders" },
-  { name: "Wishlist", icon: Heart, href: "/account/wishlist" },
-  { name: "Profile", icon: User, href: "/account/profile" },
-  { name: "Addresses", icon: MapPin, href: "/account/addresses" },
-  { name: "Settings", icon: Settings, href: "/account/settings" },
-];
+import { useAuthStore } from "@/store/authStore";
 
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { user, role } = useAuthStore();
+
+  const menuItems = [
+    { name: "Account", icon: LayoutDashboard, href: role === "admin" ? "/admin" : "/account" },
+    { name: "My Orders", icon: ShoppingBag, href: "/account/orders" },
+    { name: "Wishlist", icon: Heart, href: "/account/wishlist" },
+    { name: "Profile", icon: User, href: "/account/profile" },
+    { name: "Addresses", icon: MapPin, href: "/account/addresses" },
+    { name: "Settings", icon: Settings, href: "/account/settings" },
+  ];
 
   const handleLogout = async () => {
     try {

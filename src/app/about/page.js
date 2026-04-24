@@ -21,13 +21,13 @@ export default function AboutPage() {
     return () => unsub();
   }, []);
 
-  const defaultImage = "https://images.unsplash.com/photo-1623910385973-7740eeb2e250?q=80&w=800";
+  const defaultImage = "/img1.png";
 
   return (
     <div className="bg-white min-h-screen">
       {/* Hero Section */}
       <section className="bg-[var(--color-secondary)] py-10 sm:py-12 lg:py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div className="w-full px-6 sm:px-12 lg:px-20 text-center">
           <h1 className="text-4xl md:text-6xl font-serif text-[var(--color-text-main)] mb-4 sm:mb-6">Our Story</h1>
           <p className="text-lg text-[var(--color-text-muted)] max-w-2xl mx-auto leading-relaxed">
             From a single ball of yarn to a beloved handmade brand. Discover the passion behind every stitch at The Crochet Corner.
@@ -37,7 +37,7 @@ export default function AboutPage() {
 
       {/* Philosophy Section */}
       <section className="py-10 sm:py-12 lg:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full px-6 sm:px-12 lg:px-20">
           <div className="flex flex-col lg:flex-row items-center gap-8 sm:gap-12 lg:gap-16">
             <div className="w-full lg:w-1/2 relative">
               <div className="relative aspect-square rounded-3xl overflow-hidden shadow-2xl z-10 bg-gray-50 flex items-center justify-center">
@@ -79,7 +79,7 @@ export default function AboutPage() {
 
       {/* Stats/Values Section */}
       <section className="py-10 sm:py-12 lg:py-24 bg-[var(--color-background)]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full px-6 sm:px-12 lg:px-20">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 sm:gap-12 text-center">
             {[
               { icon: <Heart className="mx-auto mb-4 text-[var(--color-primary)]" />, title: "Handmade", desc: "100% manually crafted" },
@@ -99,7 +99,7 @@ export default function AboutPage() {
 
       {/* CTA Section */}
       <section className="py-10 sm:py-12 lg:py-24">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full px-6 sm:px-12 lg:px-20">
           <div className="bg-[var(--color-primary)] rounded-[3rem] p-8 sm:p-12 md:p-20 text-center text-white relative overflow-hidden shadow-xl">
             <div className="relative z-10">
               <h2 className="text-3xl md:text-5xl font-serif mb-8 leading-tight">Ready to bring some handmade warmth into your life?</h2>

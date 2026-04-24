@@ -136,7 +136,7 @@ function ShopContent() {
           ) : filteredProducts.map((product) => (
             <Link
               key={product.id}
-              href={`/product/${product.id}`}
+              href={`/product/${product.productId || product.id}`}
               className="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-500 overflow-hidden flex flex-col h-full border border-gray-50/50 cursor-pointer relative w-full max-w-[380px] mx-auto"
             >
               <div className="relative w-full h-[260px] sm:h-[300px] bg-gray-50 flex items-center justify-center overflow-hidden">
@@ -146,7 +146,7 @@ function ShopContent() {
                   </span>
                 )}
                 <div className="relative w-full h-full transform transition-transform duration-700 group-hover:scale-110">
-                  <Image src={product.imageUrl || "/img1.png"} alt={product.name} fill className="object-cover" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" />
+                  <Image src={product.imageUrl || "/img1.png"} alt={product.name} fill className="object-contain" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" />
                 </div>
               </div>
 

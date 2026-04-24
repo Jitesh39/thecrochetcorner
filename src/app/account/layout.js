@@ -7,13 +7,14 @@ import ScrollToTop from "@/components/admin/ScrollToTop"; // Reuse admin scroll 
 import { Menu, User, Bell } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 
 export default function AccountLayout({ children }) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const { user, loading, role } = useAuthStore();
   const router = useRouter();
+  const pathname = usePathname();
   const [hasMounted, setHasMounted] = useState(false);
 
   useEffect(() => {
@@ -27,8 +28,8 @@ export default function AccountLayout({ children }) {
 
   return (
     <div className="bg-gray-50/50 min-h-screen">
-      <ScrollToTop />
-      
+      {pathname !== "/account" && pathname !== "/account/profile" && pathname !== "/account/orders" && <ScrollToTop />}
+
       {/* Admin Sidebar - only for admins */}
       {role === "admin" && (
         <>

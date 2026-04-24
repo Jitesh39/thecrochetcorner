@@ -41,6 +41,7 @@ export default function ManageProducts() {
     const unsubCategories = onSnapshot(collection(db, "categories"), (snapshot) => {
       const catsData = snapshot.docs.map(doc => ({
         name: doc.data().name,
+        code: doc.data().code,
         slug: doc.data().slug || doc.data().name.toLowerCase().replace(/\s+/g, '')
       }));
       setCategories(catsData);
@@ -57,6 +58,12 @@ export default function ManageProducts() {
       unsubCategories();
     };
   }, []);
+
+  const generateProductId = (catCode, catName) => {
+    const code = catCode || catName?.slice(0, 3).toUpperCase().replace(/[^A-Z]/g, "") || "GEN";
+    const randomNumber = Math.floor(1000 + Math.random() * 9000);
+    return `PRD${code}${randomNumber}`;
+  };
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
@@ -98,7 +105,7 @@ export default function ManageProducts() {
 
     try {
       let urls = imagePreviews; // Default to existing previews (URLs) if no new files
-      
+
       if (imageFiles.length > 0) {
         const uploadPromises = imageFiles.map(async (file) => {
           const base64Image = await new Promise((resolve, reject) => {
@@ -133,8 +140,13 @@ export default function ManageProducts() {
         });
         setSuccessMessage("Product updated successfully!");
       } else {
+        const selectedCategory = categories.find(c => c.slug === newProduct.category);
+        const productId = generateProductId(selectedCategory?.code, selectedCategory?.name);
+        
         await addDoc(collection(db, "products"), {
           ...newProduct,
+          productId,
+          categoryCode: selectedCategory?.code || (selectedCategory?.name?.slice(0, 3).toUpperCase().replace(/[^A-Z]/g, "")),
           price: Number(newProduct.price),
           baseOrderCount: Number(newProduct.baseOrderCount) || 0,
           orderCount: 0,
@@ -142,7 +154,7 @@ export default function ManageProducts() {
           imageUrl: urls[0] || "",
           createdAt: serverTimestamp(),
         });
-        setSuccessMessage("Product added successfully!");
+        setSuccessMessage(`Product added successfully! ID: ${productId}`);
       }
 
       setSuccess(true);
@@ -165,7 +177,7 @@ export default function ManageProducts() {
       description: product.description || "",
       baseOrderCount: product.baseOrderCount || "",
     });
-    setImageFiles([]); 
+    setImageFiles([]);
     setImagePreviews(product.imageUrls || (product.imageUrl ? [product.imageUrl] : []));
     setError("");
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -191,7 +203,7 @@ export default function ManageProducts() {
   };
 
   return (
-    <div className="space-y-8 animate-in slide-in-from-bottom duration-500">
+    <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex flex-col gap-1">
         <h1 className="text-2xl font-bold text-gray-800 tracking-tight">Manage Products</h1>
         <p className="text-sm text-gray-400 font-medium">Add, edit, or remove items from your store inventory.</p>
@@ -265,7 +277,7 @@ export default function ManageProducts() {
                     ) : (
                       <>
                         <ImageIcon className="text-gray-300 transition-transform group-hover:scale-110" size={32} />
-                        <span className="text-xs font-bold text-gray-400 uppercase tracking-widest text-center">Select up to 4 images<br/>(uploading replaces existing)</span>
+                        <span className="text-xs font-bold text-gray-400 uppercase tracking-widest text-center">Select up to 4 images<br />(uploading replaces existing)</span>
                       </>
                     )}
                   </label>
@@ -321,7 +333,10 @@ export default function ManageProducts() {
                           <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 relative shrink-0">
                             <Image src={product.imageUrl || "/placeholder.png"} alt={product.name} fill className="object-cover" />
                           </div>
-                          <span className="font-bold text-gray-700">{product.name}</span>
+                          <div className="flex flex-col">
+                            <span className="font-bold text-gray-700">{product.name}</span>
+                            <span className="text-[9px] font-bold text-[var(--color-primary)] uppercase tracking-tighter">{product.productId || "NO ID"}</span>
+                          </div>
                         </div>
                       </td>
                       <td className="px-6 py-4">

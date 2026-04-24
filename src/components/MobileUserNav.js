@@ -5,10 +5,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ShoppingCart, Home, ShoppingBag, Sparkles, User } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
+import { useAuthStore } from "@/store/authStore";
 
 export default function MobileUserNav() {
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
+  const { user, role } = useAuthStore();
   const cartCount = useCartStore((state) => state.getCartCount());
   const openDrawer = useCartStore((state) => state.openDrawer);
 
@@ -17,11 +19,11 @@ export default function MobileUserNav() {
   }, []);
 
   const navItems = [
-    { name: "Home", href: "/home", icon: Home, highlight: false },
+    { name: "Home", href: "/", icon: Home, highlight: false },
     { name: "Shop", href: "/shop", icon: ShoppingBag, highlight: false },
     { name: "Custom", href: "/custom", icon: Sparkles, highlight: true },
     { name: "Cart", href: "#", icon: ShoppingCart, highlight: false, onClick: openDrawer },
-    { name: "Account", href: "/account", icon: User, highlight: false },
+    { name: "Account", href: !user ? "/login" : (role === "admin" ? "/admin" : "/account"), icon: User, highlight: false },
   ];
 
   if (!mounted) return null;

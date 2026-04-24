@@ -49,7 +49,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
     <>
       {/* Sidebar for Desktop */}
       <aside className="hidden lg:flex flex-col w-[250px] h-full bg-white border-r border-gray-100 transition-all duration-300 shadow-sm overflow-y-auto">
-        <nav className="flex-1 px-4 py-6 space-y-1">
+        <nav className="flex-1 px-4 pt-2 pb-6 space-y-1">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;

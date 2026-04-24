@@ -62,7 +62,7 @@ export async function POST(req) {
       shipping_is_billing: true,
       order_items: orderData.items?.map(item => ({
         name: item.name,
-        sku: item.id || "SKU-01",
+        sku: item.productId || item.id || "SKU-01",
         units: item.quantity || 1,
         selling_price: item.price || 0,
         discount: 0,

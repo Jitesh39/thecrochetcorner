@@ -94,25 +94,44 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h3 className="font-serif text-lg font-bold text-[var(--color-text-main)] mb-1 uppercase text-xs tracking-widest">Email</h3>
-                  {infoLoading ? <div className="h-4 w-48 bg-gray-100 animate-pulse rounded"></div> : <p className="text-[var(--color-text-muted)]">{contactInfo.email}</p>}
+                  {infoLoading ? (
+                    <div className="h-4 w-48 bg-gray-100 animate-pulse rounded"></div>
+                  ) : (
+                    <a href={`mailto:${contactInfo.email}`} className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors">
+                      {contactInfo.email}
+                    </a>
+                  )}
                 </div>
               </div>
-              <div className="flex items-start gap-4">
-                <div className="bg-[var(--color-secondary)] p-3 rounded-2xl text-[var(--color-primary)]">
-                  <Phone size={24} />
+
+              {/* PHONE (Conditional) */}
+              {!infoLoading && contactInfo.phone && contactInfo.phone.trim() !== "" && (
+                <div className="flex items-start gap-4">
+                  <div className="bg-[var(--color-secondary)] p-3 rounded-2xl text-[var(--color-primary)]">
+                    <Phone size={24} />
+                  </div>
+                  <div>
+                    <h3 className="font-serif text-lg font-bold text-[var(--color-text-main)] mb-1 uppercase text-xs tracking-widest">Phone</h3>
+                    <a href={`tel:${contactInfo.phone}`} className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors">
+                      {contactInfo.phone}
+                    </a>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-serif text-lg font-bold text-[var(--color-text-main)] mb-1 uppercase text-xs tracking-widest">Phone</h3>
-                  {infoLoading ? <div className="h-4 w-32 bg-gray-100 animate-pulse rounded"></div> : <p className="text-[var(--color-text-muted)]">{contactInfo.phone}</p>}
-                </div>
-              </div>
+              )}
+
               <div className="flex items-start gap-4">
                 <div className="bg-[var(--color-secondary)] p-3 rounded-2xl text-[var(--color-primary)]">
                   <MapPin size={24} />
                 </div>
                 <div>
                   <h3 className="font-serif text-lg font-bold text-[var(--color-text-main)] mb-1 uppercase text-xs tracking-widest">Location</h3>
-                  {infoLoading ? <div className="h-12 w-48 bg-gray-100 animate-pulse rounded"></div> : <p className="text-[var(--color-text-muted)] whitespace-pre-wrap">{contactInfo.address}</p>}
+                  {infoLoading ? (
+                    <div className="h-12 w-48 bg-gray-100 animate-pulse rounded"></div>
+                  ) : (
+                    <p className="text-[var(--color-text-muted)] whitespace-pre-wrap">
+                      {contactInfo.address || contactInfo.location || "Vadodara, Gujarat, India"}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>

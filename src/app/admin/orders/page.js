@@ -152,7 +152,7 @@ export default function OrdersPage() {
   });
 
   return (
-    <div className="space-y-8 animate-in slide-in-from-bottom duration-500">
+    <div className="space-y-6 animate-in slide-in-from-bottom duration-500">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
           <h1 className="text-2xl font-bold text-gray-800 tracking-tight">Order Management</h1>
@@ -238,7 +238,7 @@ export default function OrdersPage() {
                         {order.items?.map((item, idx) => (
                           <Link
                             key={idx}
-                            href={`/product/${item.id}`}
+                            href={`/product/${item.productId || item.id}`}
                             title={item.name}
                             className="inline-block h-10 w-10 rounded-full ring-2 ring-white bg-gray-50 overflow-hidden relative cursor-pointer hover:scale-110 transition-transform z-10 hover:z-20"
                           >

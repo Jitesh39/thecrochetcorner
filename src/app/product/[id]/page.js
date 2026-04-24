@@ -8,7 +8,7 @@ import { db } from "@/lib/firebase";
 import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
 import { useWishlistStore } from "@/store/wishlistStore";
-import { Minus, Plus, Heart, Share2, ChevronRight, Star, ShieldCheck, Truck } from "lucide-react";
+import { Minus, Plus, Heart, Share2, ChevronRight, Star, ShieldCheck, Truck, Clock } from "lucide-react";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import ProductBottomBar from "@/components/ProductBottomBar";
@@ -24,32 +24,33 @@ export default function ProductDetailPage() {
   const addItem = useCartStore((state) => state.addItem);
   const user = useAuthStore((state) => state.user);
   const { toggleItem, isInWishlist } = useWishlistStore();
+  const [isDescExpanded, setIsDescExpanded] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const docRef = doc(db, "products", id);
-        const docSnap = await getDoc(docRef);
+        setLoading(true);
+        // 1. Try to fetch by custom productId first
+        const q = query(collection(db, "products"), where("productId", "==", id), limit(1));
+        const querySnapshot = await getDocs(q);
 
-        if (docSnap.exists()) {
+        if (!querySnapshot.empty) {
+          const docSnap = querySnapshot.docs[0];
           const productData = { id: docSnap.id, ...docSnap.data() };
           setProduct(productData);
-
-          // Fetch Related Products (same category)
-          if (productData.category) {
-            const q = query(
-              collection(db, "products"),
-              where("category", "==", productData.category),
-              limit(6)
-            );
-            const querySnapshot = await getDocs(q);
-            const related = querySnapshot.docs
-              .map(doc => ({ id: doc.id, ...doc.data() }))
-              .filter(p => p.id !== id);
-            setRelatedProducts(related);
-          }
+          fetchRelated(productData);
         } else {
-          router.push("/shop");
+          // 2. Fallback to direct document ID (for backward compatibility)
+          const docRef = doc(db, "products", id);
+          const docSnap = await getDoc(docRef);
+
+          if (docSnap.exists()) {
+            const productData = { id: docSnap.id, ...docSnap.data() };
+            setProduct(productData);
+            fetchRelated(productData);
+          } else {
+            router.push("/shop");
+          }
         }
       } catch (error) {
         console.error("Error fetching product:", error);
@@ -58,9 +59,24 @@ export default function ProductDetailPage() {
       }
     };
 
+    const fetchRelated = async (productData) => {
+      if (productData.category) {
+        const q = query(
+          collection(db, "products"),
+          where("category", "==", productData.category),
+          limit(12)
+        );
+        const querySnapshot = await getDocs(q);
+        const related = querySnapshot.docs
+          .map(doc => ({ id: doc.id, ...doc.data() }))
+          .filter(p => p.id !== productData.id);
+        setRelatedProducts(related);
+      }
+    };
+
     if (id) {
       fetchProduct();
-      setSelectedImage(0); // Reset image selection on product change
+      setSelectedImage(0);
     }
   }, [id, router]);
 
@@ -96,7 +112,7 @@ export default function ProductDetailPage() {
       });
       return;
     }
-    
+
     const added = toggleItem(product);
     if (added) {
       toast.success("Added to wishlist!", { icon: '❤️' });
@@ -145,7 +161,7 @@ export default function ProductDetailPage() {
                 src={images[selectedImage]}
                 alt={product.name}
                 fill
-                className="object-cover"
+                className="object-contain"
                 priority
               />
             </div>
@@ -159,7 +175,7 @@ export default function ProductDetailPage() {
                     onClick={() => setSelectedImage(idx)}
                     className={`relative w-16 h-16 md:w-20 md:h-20 rounded-xl overflow-hidden flex-shrink-0 border-2 transition-all ${selectedImage === idx ? 'border-[var(--color-primary)]' : 'border-transparent opacity-70 hover:opacity-100'}`}
                   >
-                    <Image src={img} alt={`View ${idx + 1}`} fill className="object-cover" />
+                    <Image src={img} alt={`View ${idx + 1}`} fill className="object-contain" />
                   </button>
                 ))}
               </div>
@@ -193,60 +209,86 @@ export default function ProductDetailPage() {
 
             <div className="space-y-6 mb-6 sm:mb-10">
               <div className="prose prose-sm text-gray-500 max-w-none leading-relaxed">
-                <p>{product.description || "Individually handcrafted with the finest cotton yarn. Each piece is unique and made with meticulous attention to detail."}</p>
-              </div>
+                <div className="relative">
+                  <p className="whitespace-pre-line">
+                    {(() => {
+                      const description = product.description || "Individually handcrafted with the finest cotton yarn. Each piece is unique and made with meticulous attention to detail.";
+                      if (isDescExpanded) return description;
 
-              {/* Delivery Info Mini Cards */}
-              <div className="grid grid-cols-2 gap-4 max-w-md">
-                <div className="p-4 rounded-2xl bg-gray-50 border border-gray-100 flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-[var(--color-primary)]">
-                    <Truck size={16} />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">Shipping</p>
-                    <p className="text-xs font-bold text-gray-700">3-5 Days</p>
-                  </div>
-                </div>
-                <div className="p-4 rounded-2xl bg-gray-50 border border-gray-100 flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-[var(--color-primary)]">
-                    <ShieldCheck size={16} />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">Authentic</p>
-                    <p className="text-xs font-bold text-gray-700">100% Cotton</p>
-                  </div>
+                      const words = description.split(/\s+/);
+                      if (words.length <= 30) return description;
+
+                      return words.slice(0, 30).join(" ") + "...";
+                    })()}
+                  </p>
+                  {((product.description || "Individually handcrafted with the finest cotton yarn. Each piece is unique and made with meticulous attention to detail.").split(/\s+/).length > 30) && (
+                    <button
+                      onClick={() => setIsDescExpanded(!isDescExpanded)}
+                      className="text-[var(--color-primary)] font-bold text-xs mt-2 hover:underline focus:outline-none transition-all cursor-pointer uppercase tracking-widest"
+                    >
+                      {isDescExpanded ? "Read Less" : "Read More"}
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
 
-            <div className="space-y-6 mt-auto">
+            <div className="space-y-4 mt-auto">
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex items-center justify-between border border-gray-100 rounded-2xl bg-gray-50 p-2 w-full sm:w-min min-w-[140px]">
-                  <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="p-3 text-gray-400 hover:text-[var(--color-primary)] rounded-xl hover:bg-white active:scale-90 transition-all cursor-pointer"><Minus size={18} /></button>
+                  <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="p-3 text-gray-400 hover:text-[var(--color-primary)] rounded-xl hover:bg-white active:scale-90 transition-all cursor-pointer"><Minus size={15} /></button>
                   <span className="w-10 text-center font-bold text-gray-900">{quantity}</span>
-                  <button onClick={() => setQuantity(quantity + 1)} className="p-3 text-gray-400 hover:text-[var(--color-primary)] rounded-xl hover:bg-white active:scale-90 transition-all cursor-pointer"><Plus size={18} /></button>
+                  <button onClick={() => setQuantity(quantity + 1)} className="p-3 text-gray-400 hover:text-[var(--color-primary)] rounded-xl hover:bg-white active:scale-90 transition-all cursor-pointer"><Plus size={15} /></button>
                 </div>
 
-                <button onClick={handleAddToCart} className="flex-1 py-4 px-8 rounded-2xl bg-[var(--color-primary)] text-white font-bold shadow-lg shadow-[var(--color-primary)]/20 hover:scale-[1.02] active:scale-95 transition-all text-lg cursor-pointer">Add to Cart</button>
+                <button
+                  onClick={handleAddToCart}
+                  className="py-4 px-5 rounded-2xl bg-[var(--color-primary)] text-white font-bold shadow-lg shadow-[var(--color-primary)]/20 hover:scale-[1.02] active:scale-95 transition-all text-lg cursor-pointer"
+                >
+                  Add to Cart
+                </button>
               </div>
 
+              {/* Trust Markers List */}
+              <div className="space-y-2 pt-2">
+                <div className="flex items-center gap-3 text-gray-600">
+                  <div className="w-7 h-7 rounded-full bg-red-50 flex items-center justify-center text-[var(--color-primary)] shrink-0">
+                    <Truck size={15} strokeWidth={1.5} />
+                  </div>
+                  <span className="text-sm font-medium">Estimated delivery: 7 days</span>
+                </div>
+                <div className="flex items-center gap-3 text-gray-600">
+                  <div className="w-7 h-7 rounded-full bg-red-50 flex items-center justify-center text-[var(--color-primary)] shrink-0">
+                    <Clock size={15} strokeWidth={1.5} />
+                  </div>
+                  <span className="text-sm font-medium">Handmade to order with care</span>
+                </div>
+                <div className="flex items-center gap-3 text-gray-600">
+                  <div className="w-7 h-7 rounded-full bg-red-50 flex items-center justify-center text-[var(--color-primary)] shrink-0">
+                    <ShieldCheck size={15} strokeWidth={1.5} />
+                  </div>
+                  <span className="text-sm font-medium">Quality guaranteed</span>
+                </div>
+              </div>
               <div className="flex items-center justify-between pt-6 border-t border-gray-50">
                 <div className="flex gap-4">
-                  <button 
+                  <button
                     onClick={handleWishlist}
                     className={`flex items-center gap-2 text-xs font-bold transition-all cursor-pointer ${isInWishlist(product?.id) ? "text-[var(--color-primary)]" : "text-gray-400 hover:text-[var(--color-primary)]"}`}
                   >
-                    <Heart size={16} fill={isInWishlist(product?.id) ? "currentColor" : "none"} strokeWidth={isInWishlist(product?.id) ? 0 : 2} /> 
+                    <Heart size={16} fill={isInWishlist(product?.id) ? "currentColor" : "none"} strokeWidth={isInWishlist(product?.id) ? 0 : 2} />
                     WISH LIST
                   </button>
-                  <button 
+                  <button
                     onClick={handleShare}
                     className="flex items-center gap-2 text-xs font-bold text-gray-400 hover:text-[var(--color-primary)] transition-all cursor-pointer"
                   >
                     <Share2 size={16} /> SHARE
                   </button>
                 </div>
-                <p className="text-[10px] text-gray-300 font-bold uppercase tracking-widest">SKU: CR-{product.id.slice(0, 4).toUpperCase()}</p>
+                {product.productId && (
+                  <p className="text-[10px] text-gray-300 font-bold uppercase tracking-widest">Product ID: {product.productId}</p>
+                )}
               </div>
             </div>
           </div>
@@ -255,32 +297,31 @@ export default function ProductDetailPage() {
         {/* You May Also Love Section */}
         {relatedProducts.length > 0 && (
           <div className="mt-12 sm:mt-24 lg:mt-32">
-            <h3 className="text-2xl font-serif font-bold text-gray-900 mb-6 sm:mb-10">You May Also Love</h3>
+            <h2 className="text-2xl font-serif font-bold text-gray-900 mb-6 sm:mb-10">You May Also Love</h2>
 
-            <div className="flex overflow-x-auto gap-4 sm:gap-6 pb-8 no-scrollbar snap-x">
-              {relatedProducts.map((p) => (
-                <Link
-                  key={p.id}
-                  href={`/product/${p.id}`}
-                  className="min-w-[70%] sm:min-w-[30%] lg:min-w-[20%] snap-start group"
-                >
-                  <div className="aspect-[3/4] rounded-[1.5rem] bg-gray-50 border border-gray-100 overflow-hidden mb-4 relative transition-all duration-500 group-hover:shadow-xl group-hover:-translate-y-1">
-                    <Image
-                      src={p.imageUrl || "/placeholder.png"}
-                      alt={p.name}
-                      fill
-                      className="object-cover p-6 mix-blend-multiply transition-transform duration-700 group-hover:scale-110"
-                    />
-                  </div>
-                  <h4 className="text-sm font-serif font-bold text-gray-800 mb-1 group-hover:text-[var(--color-primary)] transition-colors">{p.name}</h4>
-                  <p className="text-sm font-bold text-gray-400">₹{p.price}</p>
-                </Link>
-              ))}
-            </div>
-
-            {/* Scroll Indicator (Mockup) */}
-            <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden max-w-xs">
-              <div className="h-full bg-[var(--color-primary)]/30 w-1/2"></div>
+            <div className="overflow-x-auto custom-scrollbar pb-6">
+              <div className="flex gap-6 min-w-max">
+                {relatedProducts.map((p) => (
+                  <Link
+                    key={p.id}
+                    href={`/product/${p.productId || p.id}`}
+                    className="w-[220px] flex-shrink-0 group"
+                  >
+                    <div className="aspect-[3/4] rounded-2xl bg-gray-50 border border-gray-100 overflow-hidden mb-4 relative transition-all duration-500 group-hover:shadow-xl group-hover:-translate-y-1">
+                      <Image
+                        src={p.imageUrl || "/placeholder.png"}
+                        alt={p.name}
+                        fill
+                        className="object-contain p-2 transition-transform duration-700 group-hover:scale-110"
+                      />
+                    </div>
+                    <p className="text-sm font-bold text-gray-800 mb-1 group-hover:text-[var(--color-primary)] transition-colors line-clamp-2 leading-snug">
+                      {p.name}
+                    </p>
+                    <p className="text-sm font-bold text-gray-400">₹{p.price.toLocaleString("en-IN")}</p>
+                  </Link>
+                ))}
+              </div>
             </div>
           </div>
         )}
@@ -289,8 +330,24 @@ export default function ProductDetailPage() {
       <ProductBottomBar product={product} />
 
       <style jsx>{`
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .custom-scrollbar {
+          scrollbar-width: thin;
+          scrollbar-color: #fca5a5 #f3f4f6;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+          height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: #f3f4f6;
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #fca5a5;
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #f87171;
+        }
       `}</style>
     </div>
   );

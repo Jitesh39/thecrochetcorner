@@ -53,7 +53,7 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Fetch all products for live suggestions
+  // Fetch all products for live suggestions (On Mount)
   useEffect(() => {
     const fetchAllProducts = async () => {
       try {
@@ -68,10 +68,8 @@ export default function Navbar() {
       }
     };
 
-    if (isSearchOpen) {
-      fetchAllProducts();
-    }
-  }, [isSearchOpen]);
+    fetchAllProducts();
+  }, []);
 
   // Debounce logic
   useEffect(() => {
@@ -103,7 +101,6 @@ export default function Navbar() {
     const handleClickOutside = (event) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
         setShowSuggestions(false);
-        setIsSearchOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -133,7 +130,7 @@ export default function Navbar() {
   };
 
   const navLinks = [
-    { name: "Home", href: "/home" },
+    { name: "Home", href: "/" },
     { name: "Shop", href: "/shop" },
     { name: "Custom", href: "/custom" },
   ];
@@ -143,11 +140,11 @@ export default function Navbar() {
   return (
     <header className={`hidden lg:block sticky top-0 z-50 w-full bg-white transition-all duration-300 ${isScrolled ? 'shadow-md py-2' : 'shadow-sm py-3'}`}>
       <div className="flex justify-center px-4 sm:px-6 lg:px-10">
-        <div className="w-full max-w-[1200px] flex justify-between items-center h-14">
+        <div className="w-full px-6 sm:px-12 lg:px-20 flex justify-between items-center h-14">
 
           {/* LEFT: Logo */}
           <div className="flex items-center gap-2 ml-3 flex-shrink-0">
-            <Link href="/home" className="flex items-center">
+            <Link href="/" className="flex items-center">
               <div className="relative h-8 w-36 sm:h-10 sm:w-44">
                 <Image src="/logo1.png" alt="TheCrochetCorner" fill className="object-contain object-left" priority />
               </div>
@@ -162,30 +159,64 @@ export default function Navbar() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => {
+                  if (searchQuery.trim().length > 0) setShowSuggestions(true);
+                }}
                 placeholder="Search products..."
                 className="w-full bg-gray-50 border-none rounded-full py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-[var(--color-primary)]/20 outline-none transition-all"
               />
-              {showSuggestions && suggestions.length > 0 && (
-                <div ref={searchRef} className="absolute top-full left-0 w-full bg-white mt-2 rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[60]">
-                  {suggestions.map((product) => (
-                    <Link
-                      key={product.id}
-                      href={`/product/${product.id}`}
-                      onClick={() => {
-                        setShowSuggestions(false);
-                        setSearchQuery("");
-                      }}
-                      className="flex items-center gap-3 p-3 hover:bg-gray-50 border-b border-gray-50 last:border-0"
+              {searchQuery.trim().length > 0 && showSuggestions && (
+                <div
+                  ref={searchRef}
+                  className="absolute top-full left-0 w-full bg-white mt-2 rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[60] max-h-[400px] flex flex-col"
+                >
+                  <div className="overflow-y-auto custom-scrollbar">
+                    {suggestions.length > 0 ? (
+                      suggestions.map((product) => (
+                        <Link
+                          key={product.id}
+                          href={`/product/${product.productId || product.id}`}
+                          onClick={() => {
+                            setShowSuggestions(false);
+                            setSearchQuery("");
+                          }}
+                          className="flex items-center justify-between gap-4 px-4 py-3 hover:bg-red-50 transition-colors border-b border-gray-50 last:border-0 group"
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="relative h-12 w-12 rounded-lg overflow-hidden bg-gray-50 flex-shrink-0 border border-gray-100">
+                              <Image src={product.imageUrl || "/img1.png"} alt={product.name} fill className="object-contain" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-sm font-bold text-black truncate group-hover:text-[var(--color-primary)] transition-colors">
+                                {product.name}
+                              </h4>
+                              <p className="text-[10px] text-black mt-0.5">
+                                {product.category || "General"}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right flex-shrink-0">
+                            <p className="text-sm font-bold text-[var(--color-primary)]">₹{product.price}</p>
+                          </div>
+                        </Link>
+                      ))
+                    ) : (
+                      <div className="p-8 text-center flex flex-col items-center justify-center gap-2">
+                        <Search className="text-gray-200" size={40} />
+                        <p className="text-sm font-bold text-gray-500">No products found</p>
+                        <p className="text-[10px] text-gray-400 uppercase tracking-widest">Try a different keyword</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {suggestions.length > 0 && (
+                    <button
+                      onClick={handleSearchSubmit}
+                      className="w-full py-3 bg-gray-50 border-t border-gray-100 text-[10px] font-bold text-[var(--color-primary)] uppercase tracking-[0.2em] hover:bg-red-50 transition-colors"
                     >
-                      <div className="relative h-10 w-10 rounded-lg overflow-hidden bg-gray-50">
-                        <Image src={product.imageUrl || "/img1.png"} alt={product.name} fill className="object-cover" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-sm font-bold text-gray-900 truncate">{product.name}</h4>
-                        <p className="text-[10px] text-[var(--color-primary)] font-bold">₹{product.price}</p>
-                      </div>
-                    </Link>
-                  ))}
+                      View all Products →
+                    </button>
+                  )}
                 </div>
               )}
             </form>
@@ -245,6 +276,12 @@ export default function Navbar() {
         </div>
       </div>
 
+      <style jsx>{`
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #fee2e2; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #fecaca; }
+      `}</style>
     </header>
   );
 }

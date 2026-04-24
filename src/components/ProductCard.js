@@ -10,7 +10,7 @@ export default function ProductCard({ product }) {
   const [isHovered, setIsHovered] = useState(false);
   const addItem = useCartStore((state) => state.addItem);
 
-  const fallbackImage = "https://images.unsplash.com/photo-1605338661642-cc019ba2f9ec?q=80&w=600&auto=format&fit=crop";
+  const fallbackImage = "/img1.png";
 
   return (
     <div 
@@ -18,12 +18,12 @@ export default function ProductCard({ product }) {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <Link href={`/product/${product.id}`} className="relative h-64 sm:h-80 w-full overflow-hidden block">
+      <Link href={`/product/${product.productId || product.id}`} className="relative h-64 sm:h-80 w-full overflow-hidden block">
         <Image
           src={product.images && product.images.length > 0 ? product.images[0] : fallbackImage}
           alt={product.name}
           fill
-          className={`object-cover object-center transition-transform duration-700 ${isHovered ? 'scale-105' : 'scale-100'}`}
+          className={`object-contain transition-transform duration-700 ${isHovered ? 'scale-105' : 'scale-100'}`}
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
         {/* Quick view / Add to cart overlay on hover */}
@@ -40,7 +40,7 @@ export default function ProductCard({ product }) {
         </div>
       </Link>
       
-      <Link href={`/product/${product.id}`} className="p-5 flex flex-col flex-grow">
+      <Link href={`/product/${product.productId || product.id}`} className="p-5 flex flex-col flex-grow">
         <div className="text-[10px] uppercase tracking-widest text-[var(--color-text-muted)] mb-2 font-medium">
           {product.category}
         </div>

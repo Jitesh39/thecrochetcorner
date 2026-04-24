@@ -3,16 +3,16 @@
 import { useEffect, useState } from "react";
 import { useAuthStore } from "@/store/authStore";
 import { db, auth } from "@/lib/firebase";
-import { collection, query, where, getDocs, limit, orderBy } from "firebase/firestore";
+import { collection, query, where, getDocs, limit, orderBy, onSnapshot, doc } from "firebase/firestore";
 import DashboardCards from "@/components/account/DashboardCards";
-import { 
-  ShoppingBag, 
-  Heart, 
-  User, 
-  ArrowRight, 
-  Edit2, 
-  MapPin, 
-  LogOut, 
+import {
+  ShoppingBag,
+  Heart,
+  User,
+  ArrowRight,
+  Edit2,
+  MapPin,
+  LogOut,
   ChevronRight,
   Package,
   Settings,
@@ -27,11 +27,10 @@ import toast from "react-hot-toast";
 const SidebarItem = ({ label, icon: Icon, href, active, onClick }) => (
   <Link
     href={href}
-    className={`flex items-center gap-3 p-4 rounded-lg cursor-pointer transition-colors ${
-      active 
-        ? "bg-[var(--color-secondary)] text-[var(--color-primary)] font-bold" 
-        : "hover:bg-gray-50 text-gray-600 font-medium"
-    }`}
+    className={`flex items-center gap-3 p-4 rounded-lg cursor-pointer transition-colors ${active
+      ? "bg-[var(--color-secondary)] text-[var(--color-primary)] font-bold"
+      : "hover:bg-gray-50 text-gray-600 font-medium"
+      }`}
   >
     {Icon && <Icon size={20} />}
     <span className="text-sm">{label}</span>
@@ -61,10 +60,18 @@ export default function UserDashboard() {
     "Wishlist Items": 0
   });
   const [recentOrders, setRecentOrders] = useState([]);
+  const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
+
+    // Real-time User Data
+    const unsubUser = onSnapshot(doc(db, "users", user.uid), (docSnap) => {
+      if (docSnap.exists()) {
+        setUserData(docSnap.data());
+      }
+    });
 
     const fetchDashData = async () => {
       try {
@@ -72,7 +79,7 @@ export default function UserDashboard() {
         const ordersRef = collection(db, "orders");
         const q = query(ordersRef, where("userId", "==", user.uid), orderBy("createdAt", "desc"), limit(5));
         const orderSnap = await getDocs(q);
-        
+
         const orders = orderSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setRecentOrders(orders);
 
@@ -81,7 +88,7 @@ export default function UserDashboard() {
           "Total Orders": orders.length,
           "Pending Orders": orders.filter(o => o.status === "Pending" || o.status === "Processing").length,
           "Completed Orders": orders.filter(o => o.status === "Delivered").length,
-          "Wishlist Items": 0 
+          "Wishlist Items": 0
         });
       } catch (err) {
         console.error("Error fetching user data:", err);
@@ -91,6 +98,8 @@ export default function UserDashboard() {
     };
 
     fetchDashData();
+
+    return () => unsubUser();
   }, [user]);
 
   const handleLogout = async () => {
@@ -124,25 +133,25 @@ export default function UserDashboard() {
           <div className="lg:col-span-1 space-y-6">
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center relative overflow-hidden group">
               <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-r from-[var(--color-primary)]/20 to-pink-50"></div>
-              
+
               <div className="relative z-10">
                 <div className="w-24 h-24 bg-white rounded-full mx-auto p-1 shadow-md mb-4 border border-gray-100 overflow-hidden relative group">
                   <div className="w-full h-full bg-[var(--color-secondary)] rounded-full flex items-center justify-center text-[var(--color-primary)]">
-                    {user?.photoURL ? (
-                      <Image src={user.photoURL} alt="User" fill className="object-cover" />
+                    {userData?.photoURL ? (
+                      <Image src={userData.photoURL} alt="User" fill className="object-cover" />
                     ) : (
                       <User size={40} />
                     )}
                   </div>
-                  <button className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white">
+                  <Link href="/account/profile" className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white">
                     <Edit2 size={20} />
-                  </button>
+                  </Link>
                 </div>
-                
-                <h2 className="text-xl font-bold text-gray-800">{user?.displayName || "Member"}</h2>
-                <p className="text-sm text-gray-400 font-medium mb-6">{user?.email}</p>
-                
-                <Link 
+
+                <h2 className="text-xl font-bold text-gray-800">{userData?.name || "Member"}</h2>
+                <p className="text-sm text-gray-400 font-medium mb-6">{userData?.email || user?.email}</p>
+
+                <Link
                   href="/account/profile"
                   className="inline-flex items-center gap-2 px-6 py-2.5 bg-gray-50 text-[var(--color-primary)] text-xs font-bold rounded-xl hover:bg-[var(--color-secondary)] transition-all uppercase tracking-widest"
                 >
@@ -150,15 +159,15 @@ export default function UserDashboard() {
                 </Link>
               </div>
             </div>
-            
+
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-               <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
-                  <Heart size={18} className="text-pink-500" /> Wishlist Preview
-               </h3>
-               <div className="py-8 text-center">
-                  <p className="text-sm text-gray-400 font-medium italic">Your wishlist is currently empty.</p>
-                  <Link href="/shop" className="text-xs font-bold text-[var(--color-primary)] mt-4 inline-block hover:underline">Start Shopping</Link>
-               </div>
+              <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <Heart size={18} className="text-pink-500" /> Wishlist Preview
+              </h3>
+              <div className="py-8 text-center">
+                <p className="text-sm text-gray-400 font-medium italic">Your wishlist is currently empty.</p>
+                <Link href="/shop" className="text-xs font-bold text-[var(--color-primary)] mt-4 inline-block hover:underline">Start Shopping</Link>
+              </div>
             </div>
           </div>
 
@@ -174,12 +183,12 @@ export default function UserDashboard() {
                   View All <ArrowRight size={14} />
                 </Link>
               </div>
-              
+
               <div className="overflow-x-auto">
                 {recentOrders.length === 0 ? (
                   <div className="py-20 text-center text-gray-400 font-medium px-6">
-                     <ShoppingBag size={40} className="mx-auto mb-4 opacity-20" />
-                     <p>You haven't placed any orders yet.</p>
+                    <ShoppingBag size={40} className="mx-auto mb-4 opacity-20" />
+                    <p>You haven't placed any orders yet.</p>
                   </div>
                 ) : (
                   <table className="w-full text-left text-sm">
@@ -195,9 +204,8 @@ export default function UserDashboard() {
                         <tr key={order.id} className="hover:bg-gray-50/50 transition-colors cursor-pointer">
                           <td className="px-6 py-4 font-bold text-gray-700">#{order.id.slice(-6).toUpperCase()}</td>
                           <td className="px-6 py-4">
-                            <span className={`px-2 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider ${
-                              order.status === "Delivered" ? "bg-green-50 text-green-600" : "bg-orange-50 text-orange-600"
-                            }`}>
+                            <span className={`px-2 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider ${order.status === "Delivered" ? "bg-green-50 text-green-600" : "bg-orange-50 text-orange-600"
+                              }`}>
                               {order.status}
                             </span>
                           </td>
@@ -218,7 +226,7 @@ export default function UserDashboard() {
   // USER UI (Flipkart Style)
   return (
     <div className="animate-in fade-in duration-500">
-      
+
       {/* DESKTOP UI */}
       <div className="hidden lg:flex gap-6">
         {/* LEFT SIDEBAR */}
@@ -226,8 +234,8 @@ export default function UserDashboard() {
           {/* Profile Card */}
           <div className="bg-white rounded-xl shadow-sm p-4 flex items-center gap-3">
             <div className="w-12 h-12 rounded-full bg-[var(--color-secondary)] overflow-hidden relative border border-gray-100">
-              {user?.photoURL ? (
-                <Image src={user.photoURL} alt="User" fill className="object-cover" />
+              {userData?.photoURL ? (
+                <Image src={userData.photoURL} alt="User" fill className="object-cover" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-[var(--color-primary)]">
                   <User size={24} />
@@ -235,24 +243,24 @@ export default function UserDashboard() {
               )}
             </div>
             <div className="min-w-0">
-              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Hello,</p>
-              <p className="font-bold text-gray-800 truncate">{user?.displayName || "Member"}</p>
+              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest leading-tight">Hello,</p>
+              <p className="font-bold text-gray-800 truncate">{userData?.name || "Member"}</p>
             </div>
           </div>
 
           {/* Menu Items */}
           <div className="bg-white rounded-xl shadow-sm overflow-hidden py-2">
             <div className="px-4 py-3 border-b border-gray-50">
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Account Settings</p>
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Account Management</p>
             </div>
             <div className="p-2 space-y-1">
               <SidebarItem label="My Orders" icon={Package} href="/account/orders" />
               <SidebarItem label="Addresses" icon={MapPin} href="/account/addresses" />
               <SidebarItem label="Wishlist" icon={Heart} href="/account/wishlist" />
               <SidebarItem label="Profile Settings" icon={User} href="/account/profile" />
-              
+
               <div className="pt-4 mt-4 border-t border-gray-50 px-2">
-                <button 
+                <button
                   onClick={handleLogout}
                   className="w-full flex items-center gap-3 p-3 rounded-lg text-red-500 font-bold hover:bg-red-50 transition-colors text-sm"
                 >
@@ -267,42 +275,42 @@ export default function UserDashboard() {
         {/* RIGHT CONTENT */}
         <div className="flex-1 space-y-6">
           <div className="bg-white rounded-xl shadow-sm p-6 min-h-[600px]">
-             {/* Dashboard View */}
-             <div className="mb-8">
-                <h2 className="text-xl font-bold text-gray-800 mb-6">Overview</h2>
-                <DashboardCards stats={stats} />
-             </div>
+            {/* Dashboard View */}
+            <div className="mb-8">
+              <h2 className="text-xl font-bold text-gray-800 mb-6">Overview</h2>
+              <DashboardCards stats={stats} />
+            </div>
 
-             <div className="border-t border-gray-50 pt-8">
-                <div className="flex items-center justify-between mb-6">
-                   <h3 className="text-lg font-bold text-gray-800">Recent Activity</h3>
-                   <Link href="/account/orders" className="text-xs font-bold text-[var(--color-primary)] hover:underline">View All</Link>
-                </div>
+            <div className="border-t border-gray-50 pt-8">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-bold text-gray-800">Recent Activity</h3>
+                <Link href="/account/orders" className="text-xs font-bold text-[var(--color-primary)] hover:underline">View All</Link>
+              </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                   <div className="p-5 rounded-xl bg-gray-50 border border-gray-100">
-                      <div className="flex items-center gap-3 mb-3 text-[var(--color-primary)]">
-                         <Package size={20} />
-                         <span className="font-bold text-sm">Recent Order</span>
-                      </div>
-                      {recentOrders.length > 0 ? (
-                        <div>
-                           <p className="text-sm font-bold text-gray-800">#{recentOrders[0].id.slice(-8).toUpperCase()}</p>
-                           <p className="text-xs text-gray-500 mt-1 uppercase tracking-wider">{recentOrders[0].status}</p>
-                        </div>
-                      ) : (
-                        <p className="text-xs text-gray-400 italic">No orders yet</p>
-                      )}
-                   </div>
-                   <div className="p-5 rounded-xl bg-gray-50 border border-gray-100">
-                      <div className="flex items-center gap-3 mb-3 text-pink-500">
-                         <Heart size={20} />
-                         <span className="font-bold text-sm">Wishlist</span>
-                      </div>
-                      <p className="text-xs text-gray-400 italic">Explore your favorites</p>
-                   </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-5 rounded-xl bg-gray-50 border border-gray-100">
+                  <div className="flex items-center gap-3 mb-3 text-[var(--color-primary)]">
+                    <Package size={20} />
+                    <span className="font-bold text-sm">Recent Order</span>
+                  </div>
+                  {recentOrders.length > 0 ? (
+                    <div>
+                      <p className="text-sm font-bold text-gray-800">#{recentOrders[0].id.slice(-8).toUpperCase()}</p>
+                      <p className="text-xs text-gray-500 mt-1 uppercase tracking-wider">{recentOrders[0].status}</p>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-gray-400 italic">No orders yet</p>
+                  )}
                 </div>
-             </div>
+                <div className="p-5 rounded-xl bg-gray-50 border border-gray-100">
+                  <div className="flex items-center gap-3 mb-3 text-pink-500">
+                    <Heart size={20} />
+                    <span className="font-bold text-sm">Wishlist</span>
+                  </div>
+                  <p className="text-xs text-gray-400 italic">Explore your favorites</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -313,8 +321,8 @@ export default function UserDashboard() {
         <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 rounded-full bg-[var(--color-secondary)] overflow-hidden relative border-2 border-white shadow-sm">
-              {user?.photoURL ? (
-                <Image src={user.photoURL} alt="User" fill className="object-cover" />
+              {userData?.photoURL ? (
+                <Image src={userData.photoURL} alt="User" fill className="object-cover" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-[var(--color-primary)]">
                   <User size={32} />
@@ -322,9 +330,9 @@ export default function UserDashboard() {
               )}
             </div>
             <div>
-              <p className="font-bold text-lg text-gray-800 leading-tight">{user?.displayName || "Member"}</p>
-              <p className="text-xs text-gray-500 mt-1">{user?.email}</p>
-              {user?.phoneNumber && <p className="text-xs text-gray-500">{user.phoneNumber}</p>}
+              <p className="font-bold text-lg text-gray-800 leading-tight">{userData?.name || "Member"}</p>
+              <p className="text-xs text-gray-500 mt-1">{userData?.email || user?.email}</p>
+              {(userData?.phone || user?.phoneNumber) && <p className="text-xs text-gray-500">{userData?.phone || user?.phoneNumber}</p>}
             </div>
           </div>
         </div>
@@ -339,11 +347,10 @@ export default function UserDashboard() {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden divide-y divide-gray-50">
           <MobileItem label="Edit Profile" icon={User} href="/account/profile" />
           <MobileItem label="Saved Address" icon={MapPin} href="/account/addresses" />
-          <MobileItem label="Account Settings" icon={Settings} href="/account/settings" />
         </div>
 
         {/* LOGOUT BUTTON */}
-        <button 
+        <button
           onClick={handleLogout}
           className="w-full bg-white border border-gray-100 rounded-2xl py-4 text-red-500 font-bold shadow-sm active:scale-95 transition-all flex items-center justify-center gap-2 mt-8"
         >

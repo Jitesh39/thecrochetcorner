@@ -39,7 +39,7 @@ export default function MobileHeader() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [showSearch]);
 
-  // Fetch all products for live suggestions
+  // Fetch all products for live suggestions (On Mount)
   useEffect(() => {
     const fetchAllProducts = async () => {
       try {
@@ -54,10 +54,8 @@ export default function MobileHeader() {
       }
     };
 
-    if (showSearch) {
-      fetchAllProducts();
-    }
-  }, [showSearch]);
+    fetchAllProducts();
+  }, []);
 
   // Debounce logic
   useEffect(() => {
@@ -112,8 +110,8 @@ export default function MobileHeader() {
       <div className="w-full flex items-center justify-between px-4 sm:px-6 lg:px-10">
         {/* LOGO SIDE */}
         <div className="flex items-center gap-2 ml-3 sm:ml-6">
-          <Link href="/home" className="flex items-center">
-            <Image src="/logo1.png" alt="Logo" width={140} height={32} className="h-7 w-auto object-contain" />
+          <Link href="/" className="flex items-center">
+            <Image src="/logo1.png" alt="Logo" width={140} height={32} className="h-7 w-auto object-contain" priority />
           </Link>
         </div>
 
@@ -167,31 +165,55 @@ export default function MobileHeader() {
               )}
 
               {/* Search Suggestions Dropdown */}
-              {showSuggestions && suggestions.length > 0 && (
+              {searchQuery.trim().length > 0 && showSuggestions && (
                 <div
                   ref={searchRef}
-                  className="absolute top-full left-0 w-full bg-white mt-2 rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-[120] animate-in fade-in zoom-in-95 duration-200"
+                  className="absolute top-full left-0 w-full bg-white mt-2 rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-[120] animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[350px]"
                 >
-                  {suggestions.map((product) => (
-                    <div
-                      key={product.id}
-                      onClick={() => {
-                        router.push(`/product/${product.id}`);
-                        setShowSearch(false);
-                        setSearchQuery("");
-                        setShowSuggestions(false);
-                      }}
-                      className="flex items-center gap-3 p-3 hover:bg-gray-50 border-b border-gray-50 last:border-0 cursor-pointer active:bg-gray-100 transition-colors"
+                  <div className="overflow-y-auto no-scrollbar">
+                    {suggestions.length > 0 ? (
+                      suggestions.map((product) => (
+                        <div
+                          key={product.id}
+                          onClick={() => {
+                            router.push(`/product/${product.productId || product.id}`);
+                            setShowSearch(false);
+                            setSearchQuery("");
+                            setShowSuggestions(false);
+                          }}
+                          className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-red-50 border-b border-gray-50 last:border-0 cursor-pointer active:bg-red-50 transition-colors"
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="relative h-12 w-12 rounded-lg overflow-hidden bg-gray-50 flex-shrink-0 border border-gray-100">
+                              <Image src={product.imageUrl || "/img1.png"} alt={product.name} fill className="object-contain" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-sm font-bold text-black truncate">{product.name}</h4>
+                              <p className="text-[10px] text-black mt-0.5">{product.category || "General"}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-bold text-[var(--color-primary)]">₹{product.price}</p>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="p-8 text-center flex flex-col items-center justify-center gap-2">
+                        <Search className="text-gray-200" size={32} />
+                        <p className="text-sm font-bold text-gray-500">No products found</p>
+                        <p className="text-[10px] text-gray-400 uppercase tracking-widest">Try a different keyword</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {suggestions.length > 0 && (
+                    <button
+                      onClick={handleSearchSubmit}
+                      className="w-full py-3 bg-gray-50 border-t border-gray-100 text-[10px] font-bold text-[var(--color-primary)] uppercase tracking-[0.2em] active:bg-red-50 transition-colors"
                     >
-                      <div className="relative h-10 w-10 rounded overflow-hidden bg-gray-50 flex-shrink-0">
-                        <Image src={product.imageUrl || "/img1.png"} alt={product.name} fill className="object-cover" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-sm font-bold text-gray-900 truncate">{product.name}</h4>
-                        <p className="text-[10px] text-[var(--color-primary)] font-bold">₹{product.price}</p>
-                      </div>
-                    </div>
-                  ))}
+                      View all  →
+                    </button>
+                  )}
                 </div>
               )}
             </div>
