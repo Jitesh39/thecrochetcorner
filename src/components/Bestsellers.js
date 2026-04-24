@@ -29,29 +29,29 @@ export default function Bestsellers() {
   }, []);
 
   return (
-    <section className="py-10 sm:py-12 lg:py-24 bg-[#f5f1ed]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="w-full px-3 sm:px-4 lg:px-8 py-6 sm:py-10 bg-[#f5f1ed]">
+      <div className="w-full">
         {/* Section Header */}
-        <div className="text-center mb-6 sm:mb-8 lg:mb-10">
-          <h2 className="text-4xl md:text-5xl font-serif text-[var(--color-text-main)] mb-4">
+        <div className="text-center mb-6 sm:mb-8 lg:mb-12">
+          <h2 className="text-3xl md:text-5xl font-serif text-[var(--color-text-main)] mb-3 font-bold">
             Bestselling Products
           </h2>
           <div className="h-1 w-20 bg-[var(--color-primary)] mx-auto rounded-full"></div>
         </div>
 
         {/* Product Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 px-1 sm:px-2">
           {loading ? (
             <div className="col-span-full py-20 text-center font-bold text-gray-400">Syncing latest products...</div>
           ) : products.map((product) => (
             <Link
               key={product.id}
               href={`/product/${product.id}`}
-              className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden flex flex-col h-full cursor-pointer max-w-md mx-auto w-full relative"
+              className="group bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-500 overflow-hidden flex flex-col h-full cursor-pointer relative w-full max-w-[380px] mx-auto"
             >
               {/* Product Image Area */}
-              <div className="relative aspect-square w-full bg-gray-50 flex items-center justify-center overflow-hidden">
-                <span className={`absolute top-4 left-4 bg-[var(--color-primary)] text-white text-[9px] font-bold uppercase tracking-widest px-3 py-1 rounded-full z-10 shadow-sm`}>
+              <div className="relative w-full h-[260px] sm:h-[300px] bg-gray-50 flex items-center justify-center overflow-hidden">
+                <span className={`absolute top-4 left-4 bg-[var(--color-primary)] text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full z-10 shadow-sm`}>
                   {product.category || "Best Item"}
                 </span>
 
@@ -67,12 +67,12 @@ export default function Bestsellers() {
               </div>
 
               {/* Product Info */}
-              <div className="p-6 flex flex-col flex-grow">
-                <div className="flex justify-between items-start mb-2 gap-2">
-                  <h3 className="text-lg md:text-xl font-serif text-[var(--color-text-main)] leading-snug group-hover:text-[var(--color-primary)] transition-colors line-clamp-2">
+              <div className="p-4 sm:p-5 flex flex-col flex-grow">
+                <div className="flex flex-col mb-3">
+                  <h3 className="text-base sm:text-lg font-serif text-[var(--color-text-main)] leading-snug group-hover:text-[var(--color-primary)] transition-colors line-clamp-1 mb-1">
                     {product.name}
                   </h3>
-                  <p className="text-lg md:text-xl font-medium text-[var(--color-primary)] whitespace-nowrap">
+                  <p className="text-lg font-bold text-[var(--color-primary)]">
                     ₹{product.price.toLocaleString("en-IN")}
                   </p>
                 </div>
@@ -82,7 +82,7 @@ export default function Bestsellers() {
                     {[...Array(5)].map((_, i) => (
                       <Star
                         key={i}
-                        size={16}
+                        size={12}
                         fill={i < 5 ? "currentColor" : "none"}
                         className={i < 5 ? "" : "text-gray-200"}
                       />
@@ -91,7 +91,7 @@ export default function Bestsellers() {
                   {(() => {
                     const totalOrders = (product.baseOrderCount || 0) + (product.orderCount || 0);
                     const displayCount = totalOrders > 999 ? (totalOrders / 1000).toFixed(1) + 'k+' : totalOrders;
-                    return <span className="text-xs text-gray-400 font-medium ml-1">({displayCount})</span>;
+                    return <span className="text-[11px] text-gray-400 font-medium ml-1">({displayCount})</span>;
                   })()}
                 </div>
 
@@ -101,18 +101,15 @@ export default function Bestsellers() {
                     e.stopPropagation();
                     addItem(product);
                   }}
-                  className="mt-auto w-full flex items-center justify-center gap-2 border border-gray-200 py-3 rounded-full text-sm text-[var(--color-text-main)] font-bold transition-all duration-300 hover:bg-[var(--color-primary)] hover:text-white hover:border-[var(--color-primary)] shadow-md relative z-10"
+                  className="mt-auto w-full flex items-center justify-center gap-3 border border-gray-100 py-3 rounded-xl text-sm text-[var(--color-text-main)] font-bold transition-all duration-300 hover:bg-[var(--color-primary)] hover:text-white hover:border-[var(--color-primary)] shadow-sm relative z-10"
                 >
-                  <ShoppingBag size={18} strokeWidth={2} />
+                  <ShoppingBag size={18} strokeWidth={2.5} />
                   <span>Add to Cart</span>
                 </button>
               </div>
             </Link>
           ))}
         </div>
-
-
-
       </div>
     </section>
   );

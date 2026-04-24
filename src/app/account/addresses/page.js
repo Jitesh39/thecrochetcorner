@@ -186,23 +186,23 @@ export default function AddressesPage() {
   }
 
   return (
-    <div className="space-y-8 animate-in slide-in-from-bottom duration-500">
+    <div className="space-y-6 animate-in slide-in-from-bottom duration-500">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold text-gray-800 tracking-tight">Shipping Addresses</h1>
-          <p className="text-sm text-gray-400 font-medium">Where should we deliver your handcrafted treasures?</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-800 tracking-tight">Shipping Addresses</h1>
+          <p className="text-xs sm:text-sm text-gray-400 font-medium">Where should we deliver your handcrafted treasures?</p>
         </div>
         <button
           onClick={() => handleOpenModal()}
-          className="flex items-center justify-center gap-2 px-6 py-3 bg-[var(--color-primary)] text-white rounded-xl text-xs font-bold hover:shadow-lg hover:scale-105 transition-all active:scale-95"
+          className="flex items-center justify-center gap-2 px-6 py-2.5 bg-[var(--color-primary)] text-white rounded-xl text-xs font-bold hover:shadow-lg hover:scale-105 transition-all active:scale-95"
         >
-          <Plus size={16} /> Add New Address
+          <Plus size={16} /> Add Address
         </button>
       </div>
 
       {addresses.length === 0 ? (
-        <div className="bg-white rounded-3xl p-12 text-center border border-dashed border-gray-200 flex flex-col items-center gap-4">
-          <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-300">
+        <div className="bg-white rounded-xl p-8 sm:p-12 text-center border border-dashed border-gray-200 flex flex-col items-center gap-4">
+          <div className="w-16 h-16 bg-gray-50 rounded-xl flex items-center justify-center text-gray-300">
             <MapPinned size={32} />
           </div>
           <div className="space-y-1">
@@ -217,9 +217,9 @@ export default function AddressesPage() {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           {addresses.map((addr) => (
-            <div key={addr.id} className={`bg-white p-6 rounded-2xl shadow-sm border-2 transition-all relative group ${addr.isDefault ? "border-[var(--color-primary)]" : "border-gray-100 hover:border-gray-200"}`}>
+            <div key={addr.id} className={`bg-white p-4 sm:p-6 rounded-xl shadow-sm border-2 transition-all relative group ${addr.isDefault ? "border-[var(--color-primary)]" : "border-gray-100 hover:border-gray-200"}`}>
               <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center gap-2">
                   <div className={`p-2 rounded-lg ${addr.isDefault ? "bg-[var(--color-secondary)] text-[var(--color-primary)]" : "bg-gray-50 text-gray-400"}`}>
@@ -242,7 +242,7 @@ export default function AddressesPage() {
               </div>
 
               <div className="space-y-1 mb-6">
-                <p className="font-bold text-gray-800 flex items-center gap-2">
+                <p className="font-bold text-gray-800 flex items-center gap-2 text-sm sm:text-base">
                   {addr.name}
                   <span className="text-[10px] font-normal text-gray-400">| {addr.phone}</span>
                 </p>

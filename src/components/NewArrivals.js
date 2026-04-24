@@ -34,8 +34,8 @@ export default function NewArrivals() {
   }, []);
 
   return (
-    <section className="py-8 sm:py-12 lg:py-24 bg-[#faf9f8] overflow-hidden">
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="w-full px-3 sm:px-4 lg:px-8 py-8 sm:py-16 bg-[#faf9f8] overflow-hidden">
+      <div className="w-full">
 
         {/* Header Section */}
         <div className="relative flex flex-col items-center justify-center text-center mb-6 sm:mb-10 lg:mb-16 animate-fade-in px-4">
@@ -43,7 +43,7 @@ export default function NewArrivals() {
             <span className="text-[var(--color-primary)] font-medium text-[10px] uppercase tracking-[0.4em] mb-4 block">
               JUST IN
             </span>
-            <h2 className="text-4xl md:text-5xl font-serif font-bold text-[var(--color-text-main)] mb-4 leading-tight">
+            <h2 className="text-3xl md:text-5xl font-serif font-bold text-[var(--color-text-main)] mb-4 leading-tight">
               New Arrivals
             </h2>
             <div className="h-0.5 w-16 bg-[var(--color-primary)] mx-auto mt-6 opacity-30 lg:hidden"></div>
@@ -61,40 +61,40 @@ export default function NewArrivals() {
         {loading ? (
           <div className="py-20 text-center font-bold text-gray-400">Loading new arrivals...</div>
         ) : products.length === 0 ? (
-          <div className="py-20 text-center text-gray-400 bg-white rounded-[2rem] border border-dashed border-gray-200">
+          <div className="py-20 text-center text-gray-400 bg-white rounded-xl border border-dashed border-gray-200">
             <p className="text-xl font-serif">No products available</p>
           </div>
         ) : (
           <div className="animate-slide-up">
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 lg:gap-6 px-4 sm:px-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 px-1 sm:px-2">
               {products.map((product, idx) => (
                 <Link
                   key={product.id}
                   href={`/product/${product.id}`}
-                  className={`group bg-[#f5f1ed]/50 hover:bg-white rounded-[1.5rem] p-4 transition-all duration-500 shadow-sm hover:shadow-2xl border border-transparent hover:border-gray-50 flex-col h-full transform hover:-translate-y-2 cursor-pointer relative ${idx === 4 ? 'hidden md:flex' : 'flex'}`}
+                  className={`group bg-[#f5f1ed]/50 hover:bg-white rounded-xl p-4 sm:p-5 transition-all duration-500 shadow-sm hover:shadow-xl border border-transparent hover:border-gray-50 flex-col h-full transform hover:-translate-y-1 cursor-pointer relative flex w-full max-w-[380px] mx-auto`}
                 >
                   {/* Image Area */}
-                  <div className="relative aspect-square w-full rounded-xl overflow-hidden mb-4 bg-gray-50 flex items-center justify-center group-hover:bg-[#fcfbf9] transition-colors">
+                  <div className="relative w-full h-[260px] sm:h-[300px] rounded-lg overflow-hidden mb-4 bg-gray-50 flex items-center justify-center group-hover:bg-white transition-colors">
                     <div className="relative w-full h-full transition-transform duration-700 group-hover:scale-110">
                       <Image
                         src={product.imageUrl || "/img1.png"}
                         alt={product.name}
                         fill
                         className="object-cover"
-                        sizes="(max-width: 768px) 75vw, (max-width: 1200px) 33vw, 20vw"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       />
                     </div>
                   </div>
 
                   {/* Info */}
-                  <div className="flex flex-col flex-grow text-center sm:text-left">
-                    <h4 className="text-sm md:text-base font-serif text-[var(--color-text-main)] mb-1 line-clamp-2 leading-snug group-hover:text-[var(--color-primary)] transition-colors">
+                  <div className="flex flex-col flex-grow">
+                    <h4 className="text-base sm:text-lg font-serif text-[var(--color-text-main)] mb-1 line-clamp-1 leading-snug group-hover:text-[var(--color-primary)] transition-colors">
                       {product.name}
                     </h4>
 
-                    <div className="flex items-center justify-center sm:justify-start gap-1 mb-2 text-yellow-400">
+                    <div className="flex items-center gap-1 mb-3 text-yellow-400">
                       <Star size={12} fill="currentColor" />
-                      <span className="text-[10px] text-gray-400 font-medium ml-1">
+                      <span className="text-[11px] text-gray-400 font-medium ml-1">
                         5.0
                         {(() => {
                           const totalOrders = (product.baseOrderCount || 0) + (product.orderCount || 0);
@@ -104,17 +104,17 @@ export default function NewArrivals() {
                       </span>
                     </div>
 
-                    <div className="mt-auto flex items-center justify-between gap-3">
-                      <span className="text-lg font-bold text-[var(--color-text-main)]">₹{product.price}</span>
+                    <div className="mt-auto flex items-center justify-between gap-2">
+                      <span className="text-lg sm:text-xl font-bold text-[var(--color-text-main)]">₹{product.price}</span>
                       <button
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
                           addItem(product);
                         }}
-                        className="p-2.5 rounded-full bg-white border border-gray-100 text-[var(--color-text-main)] hover:bg-[var(--color-primary)] hover:text-white hover:border-[var(--color-primary)] transition-all duration-300 shadow-sm hover:shadow-lg group/btn relative z-10"
+                        className="p-3 rounded-full bg-white border border-gray-100 text-[var(--color-text-main)] hover:bg-[var(--color-primary)] hover:text-white hover:border-[var(--color-primary)] transition-all duration-300 shadow-sm relative z-10"
                       >
-                        <ShoppingCart size={16} strokeWidth={1.5} className="group-hover/btn:scale-110 transition-transform" />
+                        <ShoppingCart size={18} strokeWidth={2} />
                       </button>
                     </div>
                   </div>
@@ -126,7 +126,7 @@ export default function NewArrivals() {
             <div className="mt-10 flex justify-center lg:hidden">
               <Link
                 href="/shop"
-                className="group flex items-center gap-2 text-sm font-bold text-[var(--color-primary)] hover:text-[var(--color-primary-dark)] transition-all bg-white px-8 py-3.5 rounded-full shadow-sm border border-gray-100 hover:shadow-md"
+                className="group flex items-center gap-2 text-sm font-bold text-[var(--color-primary)] hover:text-[var(--color-primary-dark)] transition-all bg-white px-8 py-3 rounded-full shadow-sm border border-gray-100 hover:shadow-md"
               >
                 View All <span className="transition-transform group-hover:translate-x-1">&rarr;</span>
               </Link>

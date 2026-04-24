@@ -76,25 +76,25 @@ function ShopContent() {
     });
 
   return (
-    <div className="bg-[#fcfbf9] min-h-screen pt-0 lg:pt-6 pb-8 sm:pb-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="bg-[#fcfbf9] min-h-screen pt-0 lg:pt-6 pb-8 sm:pb-16">
+      <div className="w-full px-3 sm:px-4 lg:px-8">
 
         {/* Header */}
-        <div className="text-center mb-6 sm:mb-8 lg:mb-10">
-          <h1 className="text-5xl md:text-5xl font-serif font-bold text-[var(--color-text-main)] mb-4">Our Collection</h1>
-          <p className="text-[var(--color-text-muted)] max-w-xl mx-auto">Each piece is handcrafted with premium yarn and hours of careful stitching</p>
+        <div className="text-center mb-8 sm:mb-12">
+          <h1 className="text-3xl md:text-5xl font-serif font-bold text-[var(--color-text-main)] mb-3">Our Collection</h1>
+          <p className="text-sm sm:text-base text-[var(--color-text-muted)] max-w-xl mx-auto italic px-4">Each piece is handcrafted with premium yarn and hours of careful stitching</p>
         </div>
 
         {/* Filters and Sort Row */}
-        <div className="flex flex-col lg:flex-row justify-between items-center gap-4 sm:gap-6 lg:gap-8 mb-6 sm:mb-8 lg:mb-10 px-2">
-          <div className="flex items-center gap-3 overflow-x-auto no-scrollbar w-full lg:w-auto pb-2 lg:pb-0">
+        <div className="flex flex-col lg:flex-row justify-between items-center gap-6 mb-8 sm:mb-12">
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar w-full lg:w-auto pb-2 lg:pb-0 px-1 sm:px-2">
             {categories.map((cat) => (
               <button
                 key={cat.slug}
                 onClick={() => handleCategoryClick(cat.slug)}
-                className={`whitespace-nowrap px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-300 border ${selectedCategory === cat.slug
-                  ? "bg-[#f4e8e8] text-[var(--color-primary-dark)] border-[#f4e8e8] shadow-sm active-category"
-                  : "bg-white text-gray-500 border-gray-100 hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] normal-category"
+                className={`whitespace-nowrap px-6 py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all duration-300 border ${selectedCategory === cat.slug
+                  ? "bg-[var(--color-primary)] text-white border-[var(--color-primary)] shadow-md"
+                  : "bg-white text-gray-500 border-gray-100 hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] shadow-sm"
                   }`}
               >
                 {cat.name}
@@ -102,23 +102,23 @@ function ShopContent() {
             ))}
           </div>
 
-          <div className="relative w-full sm:w-64 lg:w-48 self-end lg:self-center">
+          <div className="relative w-full sm:w-64 lg:w-56 px-2">
             <button
               onClick={() => setIsSortOpen(!isSortOpen)}
-              className="w-full flex items-center justify-between px-5 py-3 bg-white border border-gray-100 rounded-xl text-sm font-medium text-gray-600 hover:border-gray-200 transition-all shadow-sm"
+              className="w-full flex items-center justify-between px-5 py-3 bg-white border border-gray-100 rounded-xl text-sm font-bold text-gray-600 hover:border-gray-200 transition-all shadow-sm"
             >
-              <span className="text-gray-400 mr-2">Sort by:</span>
+              <span className="text-gray-400 mr-2 font-medium text-xs uppercase tracking-wider">Sort:</span>
               <span className="flex-grow text-left">{sortBy}</span>
               <ChevronDown size={16} className={`ml-2 transition-transform duration-300 ${isSortOpen ? "rotate-180" : ""}`} />
             </button>
 
             {isSortOpen && (
-              <div className="absolute top-full mt-2 left-0 w-full bg-white border border-gray-50 rounded-2xl shadow-xl z-30 py-2 animate-in fade-in slide-in-from-top-2 duration-300">
+              <div className="absolute top-full mt-2 left-2 right-2 bg-white border border-gray-50 rounded-xl shadow-xl z-[40] py-2 animate-in fade-in slide-in-from-top-2 duration-300">
                 {sortOptions.map((opt) => (
                   <button
                     key={opt}
                     onClick={() => { setSortBy(opt); setIsSortOpen(false); }}
-                    className={`w-full text-left px-5 py-3 text-sm transition-colors flex items-center justify-between ${sortBy === opt ? "bg-[var(--color-secondary)]/30 text-[var(--color-primary)] font-bold" : "text-gray-600 hover:bg-gray-50"}`}
+                    className={`w-full text-left px-5 py-3 text-sm transition-colors flex items-center justify-between ${sortBy === opt ? "bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-bold" : "text-gray-600 hover:bg-gray-50"}`}
                   >
                     {opt}
                     {sortBy === opt && <Check size={14} />}
@@ -130,18 +130,18 @@ function ShopContent() {
         </div>
 
         {/* Product Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 px-1 sm:px-2">
           {loading ? (
             <div className="col-span-full py-20 text-center font-bold text-gray-400">Loading collection...</div>
           ) : filteredProducts.map((product) => (
             <Link
               key={product.id}
               href={`/product/${product.id}`}
-              className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden flex flex-col h-full border border-gray-50/50 cursor-pointer"
+              className="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-500 overflow-hidden flex flex-col h-full border border-gray-50/50 cursor-pointer relative w-full max-w-[380px] mx-auto"
             >
-              <div className="relative aspect-square w-full bg-gray-50/50 flex items-center justify-center overflow-hidden">
+              <div className="relative w-full h-[260px] sm:h-[300px] bg-gray-50 flex items-center justify-center overflow-hidden">
                 {product.category && (
-                  <span className="absolute top-6 left-6 z-10 bg-[var(--color-primary)] text-white text-[10px] font-bold uppercase tracking-widest px-4 py-1.5 rounded-full shadow-sm">
+                  <span className="absolute top-4 left-4 z-10 bg-[var(--color-primary)] text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-sm">
                     {product.category}
                   </span>
                 )}
@@ -150,19 +150,19 @@ function ShopContent() {
                 </div>
               </div>
 
-              <div className="p-8 flex flex-col flex-grow">
-                <div className="flex justify-between items-start mb-1.5 gap-4">
-                  <h3 className="text-xl font-serif font-bold text-[var(--color-text-main)] leading-snug group-hover:text-[var(--color-primary)] transition-colors line-clamp-1">{product.name}</h3>
-                  <p className="text-xl font-bold text-[var(--color-text-main)] whitespace-nowrap">₹{product.price}</p>
+              <div className="p-4 sm:p-5 flex flex-col flex-grow">
+                <div className="flex flex-col mb-3">
+                  <h3 className="text-base sm:text-lg font-serif font-bold text-[var(--color-text-main)] leading-snug group-hover:text-[var(--color-primary)] transition-colors line-clamp-1 mb-1">{product.name}</h3>
+                  <p className="text-lg font-bold text-[var(--color-primary)]">₹{product.price}</p>
                 </div>
                 <div className="flex items-center gap-1 mb-4">
                   <div className="flex text-yellow-400">
-                    {[...Array(5)].map((_, i) => <Star key={i} size={14} fill="currentColor" />)}
+                    {[...Array(5)].map((_, i) => <Star key={i} size={12} fill="currentColor" />)}
                   </div>
                   {(() => {
                     const totalOrders = (product.baseOrderCount || 0) + (product.orderCount || 0);
                     const displayCount = totalOrders > 999 ? (totalOrders / 1000).toFixed(1) + 'k+' : totalOrders;
-                    return <span className="text-xs text-gray-400 font-medium ml-1">({displayCount})</span>;
+                    return <span className="text-[11px] text-gray-400 font-medium ml-1">({displayCount})</span>;
                   })()}
                 </div>
                 <button
@@ -171,9 +171,9 @@ function ShopContent() {
                     e.stopPropagation();
                     addItem(product);
                   }}
-                  className="mt-auto w-full flex items-center justify-center gap-3 border border-gray-100 py-4 rounded-full text-[var(--color-text-main)] font-medium transition-all duration-300 hover:bg-[var(--color-primary)] hover:text-white hover:border-[var(--color-primary)] group/btn relative overflow-hidden shadow-sm z-10"
+                  className="mt-auto w-full flex items-center justify-center gap-3 border border-gray-100 py-3 rounded-xl text-sm text-[var(--color-text-main)] font-bold transition-all duration-300 hover:bg-[var(--color-primary)] hover:text-white hover:border-[var(--color-primary)] shadow-sm relative z-10"
                 >
-                  <ShoppingBag size={18} strokeWidth={1.5} className="transition-transform group-hover/btn:-translate-y-1" />
+                  <ShoppingBag size={18} strokeWidth={2.5} />
                   <span>Add to Cart</span>
                 </button>
               </div>

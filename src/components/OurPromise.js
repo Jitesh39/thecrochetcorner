@@ -23,13 +23,13 @@ export default function OurPromise() {
   ];
 
   return (
-    <section className="py-10 sm:py-12 lg:py-20 bg-[#f5f1ed]">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col lg:flex-row items-center gap-6 sm:gap-10 lg:gap-16">
+    <section className="w-full px-3 sm:px-4 lg:px-8 py-10 sm:py-16 bg-[#f5f1ed]">
+      <div className="w-full">
+        <div className="flex flex-col lg:flex-row items-center gap-10 sm:gap-16">
 
           {/* Left Side: Image */}
-          <div className="w-full lg:w-5/12 relative group max-w-md lg:max-w-none mx-auto">
-            <div className="relative aspect-square rounded-[1.5rem] overflow-hidden shadow-xl">
+          <div className="w-full lg:w-5/12 relative group lg:max-w-none">
+            <div className="relative aspect-square rounded-xl overflow-hidden shadow-xl">
               <Image
                 src={imageUrl}
                 alt="Artisan crafting crochet bouquet"
@@ -39,26 +39,26 @@ export default function OurPromise() {
             </div>
 
             {/* Floating Card */}
-            <div className="absolute -bottom-4 -right-4 bg-white p-4 md:p-5 rounded-2xl shadow-lg border border-gray-50 flex flex-col items-center justify-center animate-bounce-subtle z-10">
-              <span className="text-[var(--color-primary)] font-serif text-xl md:text-2xl font-bold">12+</span>
+            <div className="absolute -bottom-4 -right-2 bg-white p-4 rounded-xl shadow-lg border border-gray-50 flex flex-col items-center justify-center animate-bounce-subtle z-10">
+              <span className="text-[var(--color-primary)] font-serif text-xl sm:text-2xl font-bold">12+</span>
               <span className="text-[9px] uppercase tracking-widest text-gray-400 font-bold whitespace-nowrap">hrs per bouquet</span>
             </div>
           </div>
 
           {/* Right Side: Content */}
           <div className="w-full lg:w-7/12 flex flex-col">
-            <span className="text-xs font-semibold text-[var(--color-primary)] uppercase tracking-[0.2em] mb-3 block">
+            <span className="text-xs font-semibold text-[var(--color-primary)] uppercase tracking-[0.2em] mb-4 block">
               OUR PROMISE
             </span>
-            <h2 className="text-3xl md:text-4xl font-serif text-[var(--color-text-main)] font-bold mb-3 sm:mb-5 leading-tight">
+            <h2 className="text-2xl md:text-5xl font-serif text-[var(--color-text-main)] font-bold mb-4 sm:mb-6 leading-tight">
               Every Piece Is Handmade With Hours of Love
             </h2>
-            <p className="text-base md:text-lg text-[var(--color-text-muted)] leading-relaxed mb-4 sm:mb-8 max-w-xl">
+            <p className="text-base md:text-lg text-[var(--color-text-muted)] leading-relaxed mb-6 sm:mb-10 max-w-xl italic">
               We don't mass-produce. We don't rush. Every single stitch is placed with intention, every color chosen with care. When you hold one of our pieces, you're holding someone's time, patience, and love.
             </p>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:gap-8 pt-6 border-t border-gray-200">
+            <div className="grid grid-cols-2 gap-6 sm:gap-8 pt-8 border-t border-gray-200">
               {stats.map((stat, i) => (
                 <div key={i} className="flex items-start gap-4 group">
                   <div className="text-[var(--color-primary)] mt-1 transition-transform duration-300 group-hover:scale-110">
