@@ -67,10 +67,10 @@ export default function CategorySections() {
   }).filter(cat => cat.products.length > 0);
 
   return (
-    <section className="py-12 bg-[#faf9f8] overflow-hidden">
+    <section className="py-8 sm:py-12 lg:py-24 bg-[#faf9f8] overflow-hidden">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
         {/* Main Header */}
-        <div className="text-center mb-20 animate-fade-in px-4">
+        <div className="text-center mb-10 sm:mb-20 animate-fade-in px-4">
           <span className="text-[var(--color-primary)] font-medium text-[10px] uppercase tracking-[0.4em] mb-4 block">
             BROWSE BY CATEGORY
           </span>
@@ -81,13 +81,13 @@ export default function CategorySections() {
         </div>
 
         {/* Categories Sections */}
-        <div className="space-y-12">
+        <div className="space-y-8 sm:space-y-12">
           {loading ? (
             <div className="py-20 text-center font-bold text-gray-400">Loading shop categories...</div>
           ) : categories.map((cat, idx) => (
             <div key={idx} className="animate-slide-up">
               {/* Section Header */}
-              <div className="flex justify-between items-end mb-3 border-b border-gray-100 pb-2 px-4 sm:px-0">
+              <div className="flex justify-between items-end mb-2 sm:mb-3 border-b border-gray-100 pb-2 px-4 sm:px-0">
                 <h3 className="text-3xl md:text-4xl font-serif font-bold text-[var(--color-text-main)] transition-colors hover:text-[var(--color-primary)] cursor-default">
                   {cat.title}
                 </h3>
@@ -100,7 +100,7 @@ export default function CategorySections() {
               </div>
 
               {/* Product Grid / Horizontal Scroll */}
-              <div className="flex overflow-x-auto lg:grid lg:grid-cols-5 gap-6 no-scrollbar pb-8 -mx-4 px-4 sm:mx-0 sm:px-0 snap-x snap-mandatory lg:snap-none lg:overflow-visible lg:pb-0">
+              <div className="flex overflow-x-auto lg:grid lg:grid-cols-5 gap-4 sm:gap-6 no-scrollbar pb-8 -mx-4 px-4 sm:mx-0 sm:px-0 snap-x snap-mandatory lg:snap-none lg:overflow-visible lg:pb-0">
                 {cat.products.map((product) => (
                   <Link
                     key={product.id}
@@ -129,7 +129,7 @@ export default function CategorySections() {
                       <div className="flex items-center justify-center sm:justify-start gap-1 mb-2 text-yellow-400">
                         <Star size={12} fill="currentColor" />
                         <span className="text-[10px] text-gray-400 font-medium ml-1">
-                          5.0 
+                          5.0
                           {(() => {
                             const totalOrders = (product.baseOrderCount || 0) + (product.orderCount || 0);
                             const displayCount = totalOrders > 999 ? (totalOrders / 1000).toFixed(1) + 'k+' : totalOrders;

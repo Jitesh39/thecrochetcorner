@@ -85,7 +85,7 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen overflow-x-hidden">
       {/* Hero Section */}
-      <section className="relative h-[70vh] md:h-[85vh] flex items-center justify-center bg-gray-900 overflow-hidden">
+      <section className="relative h-[70vh] sm:h-[75vh] lg:h-[85vh] flex items-center justify-center bg-gray-900 overflow-hidden -mt-[1px] pt-0">
         {/* Background Slider */}
         <AnimatePresence mode="wait">
           <motion.div
@@ -115,10 +115,10 @@ export default function Home() {
           transition={{ duration: 0.8, delay: 0.5 }}
           className="relative z-10 text-center px-6 max-w-2xl mx-auto flex flex-col items-center"
         >
-          <h1 className="text-4xl md:text-7xl font-serif font-bold text-white mb-6 leading-tight drop-shadow-lg">
+          <h1 className="text-4xl md:text-7xl font-serif font-bold text-white mb-4 sm:mb-6 leading-tight drop-shadow-lg">
             Cozy Crochet Creations
           </h1>
-          <div className="text-lg md:text-2xl text-white/90 mb-10 font-medium h-[3em] flex items-center justify-center">
+          <div className="text-lg md:text-2xl text-white/90 mb-6 sm:mb-8 lg:mb-10 font-medium h-[3em] flex items-center justify-center">
             <Typewriter texts={typingLines} />
           </div>
           <div className="flex flex-col sm:flex-row gap-4 justify-center w-full sm:w-auto px-10 sm:px-0">
@@ -204,7 +204,7 @@ function TestimonialsSection() {
   const prevSlide = () => setActiveIndex((prev) => (prev - 1 + entries.length) % entries.length);
 
   return (
-    <section className="py-24 bg-[#faf9f8] overflow-hidden">
+    <section className="py-10 sm:py-12 lg:py-24 bg-[#faf9f8] overflow-hidden">
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -212,7 +212,7 @@ function TestimonialsSection() {
         transition={{ duration: 0.8, ease: "easeOut" }}
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
       >
-        <div className="text-center mb-16">
+        <div className="text-center mb-8 sm:mb-10 lg:mb-16">
           <h2 className="text-3xl md:text-5xl font-serif text-[var(--color-text-main)] mb-4 font-bold">Happy Customers</h2>
           <p className="text-[var(--color-text-muted)] italic">"What they say about our handmade creations"</p>
         </div>

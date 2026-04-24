@@ -158,7 +158,7 @@ export default function CheckoutPage() {
   if (ordered) {
     return (
       <div className="min-h-screen bg-[var(--color-background)] flex items-center justify-center p-4">
-        <div className="bg-white max-w-lg w-full rounded-3xl p-10 text-center shadow-lg border border-gray-100 animate-in zoom-in duration-300">
+        <div className="bg-white max-w-lg w-full rounded-3xl p-6 sm:p-10 text-center shadow-lg border border-gray-100 animate-in zoom-in duration-300">
           <div className="w-20 h-20 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle size={40} />
           </div>
@@ -175,14 +175,14 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="bg-[var(--color-background)] min-h-screen py-10">
+    <div className="bg-[var(--color-background)] min-h-screen py-6 sm:py-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        <div className="flex flex-col lg:flex-row gap-10">
+        <div className="flex flex-col lg:flex-row gap-4 sm:gap-10">
           {/* Address Selection Section */}
           <div className="w-full lg:w-3/5">
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
-              <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 md:p-8">
+              <div className="flex items-center justify-between mb-4 sm:mb-6 pb-4 border-b border-gray-100">
                 <h2 className="text-2xl font-serif text-[var(--color-text-main)]">Select Delivery Address</h2>
                 <button
                   onClick={() => router.push("/account/addresses")}
@@ -262,7 +262,7 @@ export default function CheckoutPage() {
 
           {/* Order Summary sidebar */}
           <div className="w-full lg:w-2/5">
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8 sticky top-24">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 md:p-8 sticky top-24">
               <h2 className="text-xl font-serif text-[var(--color-text-main)] mb-6 pb-4 border-b border-gray-100">Order Summary</h2>
 
               <div className="space-y-4 mb-6 max-h-[45vh] overflow-y-auto pr-2 custom-scrollbar">

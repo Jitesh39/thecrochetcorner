@@ -26,9 +26,9 @@ export default function AboutPage() {
   return (
     <div className="bg-white min-h-screen">
       {/* Hero Section */}
-      <section className="bg-[var(--color-secondary)] py-20">
+      <section className="bg-[var(--color-secondary)] py-10 sm:py-12 lg:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-6xl font-serif text-[var(--color-text-main)] mb-6">Our Story</h1>
+          <h1 className="text-4xl md:text-6xl font-serif text-[var(--color-text-main)] mb-4 sm:mb-6">Our Story</h1>
           <p className="text-lg text-[var(--color-text-muted)] max-w-2xl mx-auto leading-relaxed">
             From a single ball of yarn to a beloved handmade brand. Discover the passion behind every stitch at The Crochet Corner.
           </p>
@@ -36,9 +36,9 @@ export default function AboutPage() {
       </section>
 
       {/* Philosophy Section */}
-      <section className="py-24">
+      <section className="py-10 sm:py-12 lg:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col lg:flex-row items-center gap-16">
+          <div className="flex flex-col lg:flex-row items-center gap-8 sm:gap-12 lg:gap-16">
             <div className="w-full lg:w-1/2 relative">
               <div className="relative aspect-square rounded-3xl overflow-hidden shadow-2xl z-10 bg-gray-50 flex items-center justify-center">
                 {loading ? (
@@ -58,10 +58,10 @@ export default function AboutPage() {
 
             <div className="w-full lg:w-1/2">
               <span className="text-[var(--color-primary)] font-medium uppercase tracking-[0.2em] mb-4 block">Crafting Excellence</span>
-              <h2 className="text-3xl md:text-5xl font-serif text-[var(--color-text-main)] mb-8 leading-tight">
+              <h2 className="text-3xl md:text-5xl font-serif text-[var(--color-text-main)] mb-4 sm:mb-8 leading-tight">
                 Every Stitch is a Labor of Love
               </h2>
-              <div className="space-y-6 text-[var(--color-text-muted)] leading-relaxed">
+              <div className="space-y-3 sm:space-y-6 text-[var(--color-text-muted)] leading-relaxed">
                 <p>
                   The Crochet Corner started with a simple vision: to bring the timeless beauty of handmade crafts into modern homes. What began as a personal hobby evolved into a dedicated studio where every item is meticulously crafted by hand.
                 </p>
@@ -78,9 +78,9 @@ export default function AboutPage() {
       </section>
 
       {/* Stats/Values Section */}
-      <section className="py-24 bg-[var(--color-background)]">
+      <section className="py-10 sm:py-12 lg:py-24 bg-[var(--color-background)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 text-center">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 sm:gap-12 text-center">
             {[
               { icon: <Heart className="mx-auto mb-4 text-[var(--color-primary)]" />, title: "Handmade", desc: "100% manually crafted" },
               { icon: <Users className="mx-auto mb-4 text-[var(--color-primary)]" />, title: "Community", desc: "Supporting local artisans" },
@@ -98,9 +98,9 @@ export default function AboutPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24">
+      <section className="py-10 sm:py-12 lg:py-24">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-[var(--color-primary)] rounded-[3rem] p-12 md:p-20 text-center text-white relative overflow-hidden shadow-xl">
+          <div className="bg-[var(--color-primary)] rounded-[3rem] p-8 sm:p-12 md:p-20 text-center text-white relative overflow-hidden shadow-xl">
             <div className="relative z-10">
               <h2 className="text-3xl md:text-5xl font-serif mb-8 leading-tight">Ready to bring some handmade warmth into your life?</h2>
               <Link href="/shop" className="bg-white text-[var(--color-primary)] px-10 py-4 rounded-full font-bold hover:bg-gray-100 transition-colors inline-block text-lg">

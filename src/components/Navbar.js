@@ -139,7 +139,7 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`sticky top-0 w-full z-[100] transition-all duration-500 border-b ${isScrolled || isSearchOpen || isMobileMenuOpen
+      className={`sticky top-0 w-full z-[100] transition-all duration-500 border-b hidden lg:block ${isScrolled || isSearchOpen || isMobileMenuOpen
         ? "bg-white shadow-lg py-2 border-gray-100"
         : "bg-white/90 backdrop-blur-md py-4 border-transparent"
         }`}
@@ -211,12 +211,6 @@ export default function Navbar() {
                   {cartCount}
                 </span>
               )}
-            </button>
-            <button
-              className="md:hidden p-2 text-[var(--color-text-main)] active:scale-90"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            >
-              {isMobileMenuOpen ? <X size={24} strokeWidth={1.5} /> : <Menu size={24} strokeWidth={1.5} />}
             </button>
           </div>
         </div>

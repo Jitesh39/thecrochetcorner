@@ -23,9 +23,9 @@ export default function OurPromise() {
   ];
 
   return (
-    <section className="py-16 md:py-20 bg-[#f5f1ed]">
+    <section className="py-10 sm:py-12 lg:py-20 bg-[#f5f1ed]">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
+        <div className="flex flex-col lg:flex-row items-center gap-6 sm:gap-10 lg:gap-16">
 
           {/* Left Side: Image */}
           <div className="w-full lg:w-5/12 relative group max-w-md lg:max-w-none mx-auto">
@@ -50,15 +50,15 @@ export default function OurPromise() {
             <span className="text-xs font-semibold text-[var(--color-primary)] uppercase tracking-[0.2em] mb-3 block">
               OUR PROMISE
             </span>
-            <h2 className="text-3xl md:text-4xl font-serif text-[var(--color-text-main)] font-bold mb-5 leading-tight">
+            <h2 className="text-3xl md:text-4xl font-serif text-[var(--color-text-main)] font-bold mb-3 sm:mb-5 leading-tight">
               Every Piece Is Handmade With Hours of Love
             </h2>
-            <p className="text-base md:text-lg text-[var(--color-text-muted)] leading-relaxed mb-8 max-w-xl">
+            <p className="text-base md:text-lg text-[var(--color-text-muted)] leading-relaxed mb-4 sm:mb-8 max-w-xl">
               We don't mass-produce. We don't rush. Every single stitch is placed with intention, every color chosen with care. When you hold one of our pieces, you're holding someone's time, patience, and love.
             </p>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-2 gap-6 md:gap-8 pt-6 border-t border-gray-200">
+            <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:gap-8 pt-6 border-t border-gray-200">
               {stats.map((stat, i) => (
                 <div key={i} className="flex items-start gap-4 group">
                   <div className="text-[var(--color-primary)] mt-1 transition-transform duration-300 group-hover:scale-110">

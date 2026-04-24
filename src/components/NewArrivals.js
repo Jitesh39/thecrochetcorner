@@ -34,11 +34,11 @@ export default function NewArrivals() {
   }, []);
 
   return (
-    <section className="py-12 bg-[#faf9f8] overflow-hidden">
+    <section className="py-8 sm:py-12 lg:py-24 bg-[#faf9f8] overflow-hidden">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Header Section */}
-        <div className="relative flex flex-col items-center justify-center text-center mb-12 animate-fade-in px-4">
+        <div className="relative flex flex-col items-center justify-center text-center mb-6 sm:mb-10 lg:mb-16 animate-fade-in px-4">
           <div className="max-w-2xl mx-auto">
             <span className="text-[var(--color-primary)] font-medium text-[10px] uppercase tracking-[0.4em] mb-4 block">
               JUST IN
@@ -66,7 +66,7 @@ export default function NewArrivals() {
           </div>
         ) : (
           <div className="animate-slide-up">
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 px-4 sm:px-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 lg:gap-6 px-4 sm:px-6">
               {products.map((product, idx) => (
                 <Link
                   key={product.id}

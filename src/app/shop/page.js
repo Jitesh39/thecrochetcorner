@@ -76,17 +76,17 @@ function ShopContent() {
     });
 
   return (
-    <div className="bg-[#fcfbf9] min-h-screen pt-6 pb-12">
+    <div className="bg-[#fcfbf9] min-h-screen pt-0 lg:pt-6 pb-8 sm:pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Header */}
-        <div className="text-center mb-10">
+        <div className="text-center mb-6 sm:mb-8 lg:mb-10">
           <h1 className="text-5xl md:text-5xl font-serif font-bold text-[var(--color-text-main)] mb-4">Our Collection</h1>
           <p className="text-[var(--color-text-muted)] max-w-xl mx-auto">Each piece is handcrafted with premium yarn and hours of careful stitching</p>
         </div>
 
         {/* Filters and Sort Row */}
-        <div className="flex flex-col lg:flex-row justify-between items-center gap-8 mb-10 px-2">
+        <div className="flex flex-col lg:flex-row justify-between items-center gap-4 sm:gap-6 lg:gap-8 mb-6 sm:mb-8 lg:mb-10 px-2">
           <div className="flex items-center gap-3 overflow-x-auto no-scrollbar w-full lg:w-auto pb-2 lg:pb-0">
             {categories.map((cat) => (
               <button
@@ -130,7 +130,7 @@ function ShopContent() {
         </div>
 
         {/* Product Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-10">
           {loading ? (
             <div className="col-span-full py-20 text-center font-bold text-gray-400">Loading collection...</div>
           ) : filteredProducts.map((product) => (
@@ -182,7 +182,7 @@ function ShopContent() {
         </div>
 
         {filteredProducts.length === 0 && (
-          <div className="py-24 text-center bg-white rounded-[3rem] border border-dashed border-gray-200">
+          <div className="py-10 sm:py-12 lg:py-24 text-center bg-white rounded-[3rem] border border-dashed border-gray-200">
             <p className="text-2xl font-serif text-gray-300">No products found in this category.</p>
             <button onClick={() => handleCategoryClick("all")} className="mt-6 text-[var(--color-primary)] font-bold underline underline-offset-4">View All Collection</button>
           </div>

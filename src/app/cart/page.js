@@ -39,12 +39,12 @@ export default function CartPage() {
   if (!mounted) return null; // Prevent hydration mismatch
 
   return (
-    <div className="bg-[var(--color-background)] min-h-screen py-10">
+    <div className="bg-[var(--color-background)] min-h-screen py-6 sm:py-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl md:text-4xl font-serif text-[var(--color-text-main)] mb-8">Shopping Cart</h1>
+        <h1 className="text-3xl md:text-4xl font-serif text-[var(--color-text-main)] mb-4 sm:mb-8">Shopping Cart</h1>
 
         {items.length === 0 ? (
-          <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-gray-100 flex flex-col items-center">
+          <div className="bg-white rounded-2xl p-6 sm:p-12 text-center shadow-sm border border-gray-100 flex flex-col items-center">
             <div className="bg-gray-50 p-6 rounded-full w-24 h-24 flex items-center justify-center mb-6">
               <svg className="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
             </div>
@@ -55,7 +55,7 @@ export default function CartPage() {
             </Link>
           </div>
         ) : (
-          <div className="flex flex-col lg:flex-row gap-8">
+          <div className="flex flex-col lg:flex-row gap-4 sm:gap-8">
             {/* Cart Items */}
             <div className="w-full lg:w-2/3 space-y-4">
               {items.map((item) => (

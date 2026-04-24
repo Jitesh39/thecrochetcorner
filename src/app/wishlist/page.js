@@ -27,9 +27,9 @@ export default function WishlistPage() {
   if (!mounted) return null;
 
   return (
-    <div className="bg-[var(--color-background)] min-h-screen py-12 md:py-20">
+    <div className="bg-[var(--color-background)] min-h-screen pt-0 lg:pt-12 pb-12 lg:pb-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-4 mb-10">
+        <div className="flex items-center gap-4 mb-6 sm:mb-8 lg:mb-10">
           <div className="bg-[var(--color-primary)] p-3 rounded-2xl text-white shadow-lg shadow-[var(--color-primary)]/20">
             <Heart size={28} fill="currentColor" />
           </div>
@@ -42,7 +42,7 @@ export default function WishlistPage() {
         </div>
 
         {items.length === 0 ? (
-          <div className="bg-white rounded-[2.5rem] p-12 md:p-20 text-center shadow-sm border border-gray-100 flex flex-col items-center max-w-2xl mx-auto">
+          <div className="bg-white rounded-[2.5rem] p-8 sm:p-12 md:p-20 text-center shadow-sm border border-gray-100 flex flex-col items-center max-w-2xl mx-auto">
             <div className="bg-[#fcf8f8] p-10 rounded-full mb-8 text-[var(--color-primary)]/20">
               <Heart size={80} strokeWidth={1} />
             </div>
@@ -58,7 +58,7 @@ export default function WishlistPage() {
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
             {items.map((item) => (
               <div 
                 key={item.id} 

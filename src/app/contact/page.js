@@ -56,12 +56,12 @@ export default function ContactPage() {
   return (
     <div className="bg-white min-h-screen">
       {/* Hero Section */}
-      <section className="bg-[var(--color-secondary)] py-20 px-4">
+      <section className="bg-[var(--color-secondary)] py-10 sm:py-12 lg:py-20 px-4">
         <div className="max-w-7xl mx-auto text-center">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-4xl md:text-6xl font-serif text-[var(--color-text-main)] mb-6"
+            className="text-4xl md:text-6xl font-serif text-[var(--color-text-main)] mb-4 sm:mb-6"
           >
             Contact Us
           </motion.h1>
@@ -77,8 +77,8 @@ export default function ContactPage() {
       </section>
 
       {/* Main Contact Section */}
-      <section className="py-24 px-4">
-        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-16 lg:gap-32">
+      <section className="py-10 sm:py-12 lg:py-24 px-4">
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-8 sm:gap-16 lg:gap-32">
           {/* Info Section */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -86,8 +86,8 @@ export default function ContactPage() {
             viewport={{ once: true }}
             className="w-full lg:w-1/3 order-last lg:order-first"
           >
-            <h2 className="text-3xl font-serif text-[var(--color-text-main)] mb-10">Get in Touch</h2>
-            <div className="space-y-8">
+            <h2 className="text-3xl font-serif text-[var(--color-text-main)] mb-6 sm:mb-10">Get in Touch</h2>
+            <div className="space-y-4 sm:space-y-8">
               <div className="flex items-start gap-4">
                 <div className="bg-[var(--color-secondary)] p-3 rounded-2xl text-[var(--color-primary)]">
                   <Mail size={24} />

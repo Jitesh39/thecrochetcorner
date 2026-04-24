@@ -313,11 +313,11 @@ export default function CrochetStudio() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f5f1ed] pt-16 pb-24">
+    <div className="min-h-screen bg-[#f5f1ed] pt-0 lg:pt-16 pb-12 sm:pb-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Hero */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-6 sm:mb-10 lg:mb-12">
           <span className="text-xs font-bold text-[var(--color-primary)] uppercase tracking-[0.3em] mb-3 block">
             THE CROCHET STUDIO
           </span>
@@ -326,7 +326,7 @@ export default function CrochetStudio() {
           </h1>
 
           {/* Mode Switcher */}
-          <div className="flex flex-col items-center gap-4">
+          <div className="flex flex-col items-center gap-3 sm:gap-4">
             <div className="inline-flex bg-white p-1.5 rounded-2xl shadow-sm border border-gray-100">
               <button
                 onClick={() => { setMode("smart"); setStep(1); setStatus("idle"); }}
@@ -349,10 +349,10 @@ export default function CrochetStudio() {
           </div>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-8">
+        <div className="flex flex-col lg:flex-row gap-4 sm:gap-8">
 
-          {/* Left Side: Context/Progress */}
-          <div className="w-full lg:w-1/4 space-y-6">
+          {/* Left Side: Progress */}
+          <div className="w-full lg:w-1/4 space-y-4 sm:space-y-6">
             <div className="bg-white rounded-[1.5rem] p-6 shadow-sm border border-gray-100 sticky top-24">
               <h3 className="text-lg font-serif font-bold text-[var(--color-text-main)] mb-6">
                 {mode === "smart" ? "Studio Progress" : "Design Summary"}
@@ -423,19 +423,19 @@ export default function CrochetStudio() {
 
           {/* Right Side: Forms */}
           <div className="w-full lg:w-3/4">
-            <div className="bg-white rounded-[2rem] p-8 md:p-12 shadow-sm border border-gray-100 min-h-[500px]">
+            <div className="bg-white rounded-[2rem] p-4 sm:p-8 md:p-12 shadow-sm border border-gray-100 min-h-[500px]">
               <AnimatePresence mode="wait">
 
                 {mode === "smart" ? (
                   <motion.div key="smart" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
                     {/* Step 1: Type */}
                     {step === 1 && (
-                      <div className="space-y-8">
+                      <div className="space-y-4 sm:space-y-8">
                         <div className="space-y-2">
                           <h2 className="text-3xl font-serif font-bold text-[var(--color-text-main)]">Choose Type</h2>
                           <p className="text-sm text-[var(--color-text-muted)]">Select the base item for your custom order.</p>
                         </div>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-6">
                           {types.map((t) => (
                             <button key={t} onClick={() => handleSelect("type", t)} className={`p-6 rounded-2xl border-2 transition-all ${formData.type === t ? "border-[var(--color-primary)] bg-[var(--color-secondary)]/30 scale-105" : "border-gray-100 hover:border-[var(--color-primary)]/50"}`}>
                               <span className="text-sm font-bold tracking-wide">{t}</span>
@@ -453,7 +453,7 @@ export default function CrochetStudio() {
                           <h2 className="text-3xl font-serif font-bold text-[var(--color-text-main)]">Pick Colors</h2>
                           <p className="text-sm text-[var(--color-text-muted)]">Choose the primary palette for your {formData.type}.</p>
                         </div>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-6">
                           {colors.map((c) => (
                             <button key={c} onClick={() => handleSelect("color", c)} className={`p-6 rounded-2xl border-2 transition-all ${formData.color === c ? "border-[var(--color-primary)] bg-[var(--color-secondary)]/30 scale-105" : "border-gray-100 hover:border-[var(--color-primary)]/50"}`}>
                               <span className="text-sm font-bold tracking-wide">{c}</span>

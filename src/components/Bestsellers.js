@@ -29,10 +29,10 @@ export default function Bestsellers() {
   }, []);
 
   return (
-    <section className="py-24 bg-[#f5f1ed]">
+    <section className="py-10 sm:py-12 lg:py-24 bg-[#f5f1ed]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center mb-10">
+        <div className="text-center mb-6 sm:mb-8 lg:mb-10">
           <h2 className="text-4xl md:text-5xl font-serif text-[var(--color-text-main)] mb-4">
             Bestselling Products
           </h2>
@@ -40,7 +40,7 @@ export default function Bestsellers() {
         </div>
 
         {/* Product Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-10">
           {loading ? (
             <div className="col-span-full py-20 text-center font-bold text-gray-400">Syncing latest products...</div>
           ) : products.map((product) => (

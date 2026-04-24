@@ -11,6 +11,7 @@ import { useWishlistStore } from "@/store/wishlistStore";
 import { Minus, Plus, Heart, Share2, ChevronRight, Star, ShieldCheck, Truck } from "lucide-react";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import ProductBottomBar from "@/components/ProductBottomBar";
 
 export default function ProductDetailPage() {
   const { id } = useParams();
@@ -124,11 +125,11 @@ export default function ProductDetailPage() {
   };
 
   return (
-    <div className="bg-white min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+    <div className="bg-white min-h-screen pb-24 lg:pb-0">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-12">
 
         {/* Breadcrumb */}
-        <nav className="flex items-center text-xs md:text-sm text-gray-400 mb-8 md:mb-12">
+        <nav className="flex items-center text-xs md:text-sm text-gray-400 mb-4 sm:mb-8 lg:mb-12">
           <Link href="/" className="hover:text-[var(--color-primary)] transition-colors">Home</Link>
           <ChevronRight size={14} className="mx-2" />
           <Link href="/shop" className="hover:text-[var(--color-primary)] transition-colors">Shop Collection</Link>
@@ -136,7 +137,7 @@ export default function ProductDetailPage() {
           <span className="text-gray-900 truncate font-medium">{product.name}</span>
         </nav>
 
-        <div className="flex flex-col lg:flex-row gap-8 lg:gap-16">
+        <div className="flex flex-col lg:flex-row gap-6 sm:gap-10 lg:gap-16">
           {/* Left: Image Gallery (Narrower) */}
           <div className="w-full lg:w-[40%] space-y-6">
             <div className="relative aspect-square rounded-[2rem] overflow-hidden bg-gray-50 border border-gray-100 shadow-sm">
@@ -181,16 +182,16 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
-            <h1 className="text-4xl md:text-5xl font-serif font-bold text-gray-900 mb-4 leading-tight">
+            <h1 className="text-4xl md:text-5xl font-serif font-bold text-gray-900 mb-2 sm:mb-4 leading-tight">
               {product.name}
             </h1>
 
-            <div className="flex items-baseline gap-4 mb-8">
+            <div className="flex items-baseline gap-4 mb-4 sm:mb-8">
               <span className="text-3xl font-bold text-gray-900">₹{product.price.toLocaleString("en-IN")}</span>
               <span className="text-sm text-gray-400 font-medium">Inclusive of all taxes</span>
             </div>
 
-            <div className="space-y-6 mb-10">
+            <div className="space-y-6 mb-6 sm:mb-10">
               <div className="prose prose-sm text-gray-500 max-w-none leading-relaxed">
                 <p>{product.description || "Individually handcrafted with the finest cotton yarn. Each piece is unique and made with meticulous attention to detail."}</p>
               </div>
@@ -253,10 +254,10 @@ export default function ProductDetailPage() {
 
         {/* You May Also Love Section */}
         {relatedProducts.length > 0 && (
-          <div className="mt-24 lg:mt-32">
-            <h3 className="text-2xl font-serif font-bold text-gray-900 mb-10">You May Also Love</h3>
+          <div className="mt-12 sm:mt-24 lg:mt-32">
+            <h3 className="text-2xl font-serif font-bold text-gray-900 mb-6 sm:mb-10">You May Also Love</h3>
 
-            <div className="flex overflow-x-auto gap-6 pb-8 no-scrollbar snap-x">
+            <div className="flex overflow-x-auto gap-4 sm:gap-6 pb-8 no-scrollbar snap-x">
               {relatedProducts.map((p) => (
                 <Link
                   key={p.id}
@@ -284,6 +285,8 @@ export default function ProductDetailPage() {
           </div>
         )}
       </div>
+
+      <ProductBottomBar product={product} />
 
       <style jsx>{`
         .no-scrollbar::-webkit-scrollbar { display: none; }
