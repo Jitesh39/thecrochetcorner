@@ -8,6 +8,7 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   sendEmailVerification,
+  sendPasswordResetEmail,
   signOut
 } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
@@ -23,6 +24,8 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showForgotPwd, setShowForgotPwd] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
   const router = useRouter();
 
   const handleResendEmail = async () => {
@@ -36,6 +39,35 @@ export default function LoginPage() {
       await signOut(auth);
     } catch (err) {
       setError(err.message || "Failed to resend verification email.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    setError("");
+    setMessage("");
+
+    if (!resetEmail) {
+      setError("Enter valid email");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await sendPasswordResetEmail(auth, resetEmail);
+      setMessage("Password reset link sent to your email 📩");
+      setShowForgotPwd(false);
+      setResetEmail("");
+    } catch (err) {
+      if (err.code === "auth/user-not-found") {
+        setError("No account found");
+      } else if (err.code === "auth/invalid-email") {
+        setError("Enter valid email");
+      } else {
+        setError(err.message || "Failed to send reset email");
+      }
     } finally {
       setLoading(false);
     }
@@ -110,7 +142,7 @@ export default function LoginPage() {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        // Send verification email
+        // Send default verification email
         await sendEmailVerification(user);
 
         // Save to Firestore
@@ -123,7 +155,7 @@ export default function LoginPage() {
           role: "user" // Default role
         });
 
-        setMessage("Verification email sent! Please check your inbox to activate your account.");
+        setMessage("Verification email sent. Please check your inbox.");
         await signOut(auth);
         setIsLogin(true);
       }
@@ -135,7 +167,55 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="bg-[var(--color-background)] min-h-[80vh] flex items-center justify-center p-4">
+    <div className="bg-[var(--color-background)] min-h-[80vh] flex items-center justify-center p-4 relative">
+
+      {/* Forgot Password Modal */}
+      {showForgotPwd && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-white max-w-sm w-full rounded-2xl p-6 shadow-xl border border-gray-100">
+            <h2 className="text-xl font-serif text-[var(--color-text-main)] mb-2">Reset Password</h2>
+            <p className="text-[var(--color-text-muted)] text-sm mb-4">
+              Enter your email and we'll send you a link to reset your password.
+            </p>
+            {error && (
+              <div className="bg-red-50 text-red-500 p-2.5 rounded-lg text-sm mb-4 text-center">
+                {error}
+              </div>
+            )}
+            <form onSubmit={handleForgotPassword} className="space-y-4">
+              <div className="relative">
+                <input
+                  type="email"
+                  required
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  className="w-full border border-gray-200 rounded-lg pl-10 pr-4 py-3 focus:outline-none focus:border-[var(--color-primary)] transition-all"
+                  placeholder="you@gmail.com"
+                />
+                <Mail size={18} className="absolute left-3 top-3.5 text-gray-400" />
+              </div>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => { setShowForgotPwd(false); setError(""); setResetEmail(""); }}
+                  disabled={loading}
+                  className="flex-1 bg-gray-50 border border-gray-200 text-gray-700 py-3 rounded-lg font-medium transition-all hover:bg-gray-100 disabled:opacity-70"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="flex-1 bg-[var(--color-primary)] text-white py-3 rounded-lg font-medium transition-all hover:opacity-90 disabled:opacity-70"
+                >
+                  {loading ? "Sending..." : "Send Link"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white max-w-md w-full rounded-2xl p-8 shadow-sm border border-gray-100">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-serif text-[var(--color-text-main)] mb-2">
@@ -211,6 +291,17 @@ export default function LoginPage() {
               />
               <Lock size={18} className="absolute left-3 top-3.5 text-gray-400" />
             </div>
+            {isLogin && (
+              <div className="flex justify-end mt-1.5">
+                <button
+                  type="button"
+                  onClick={() => { setShowForgotPwd(true); setError(""); setMessage(""); setResetEmail(email); }}
+                  className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors underline-offset-2 hover:underline"
+                >
+                  Forgot Password?
+                </button>
+              </div>
+            )}
           </div>
 
           <button
