@@ -59,7 +59,7 @@ function Typewriter({ texts }) {
 }
 
 export default function Home() {
-  const [images, setImages] = useState(heroImages);
+  const [slides, setSlides] = useState(heroImages.map(url => ({ type: "image", url })));
   const [typingLines, setTypingLines] = useState(defaultTypingLines);
   const [currentImage, setCurrentImage] = useState(0);
 
@@ -67,7 +67,12 @@ export default function Home() {
     const unsub = onSnapshot(doc(db, "settings", "hero"), (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
-        if (data.images && data.images.length > 0) setImages(data.images);
+        let heroSlides = data.heroSlides || [];
+        // Migration: if heroSlides is empty but images exists, migrate it
+        if (heroSlides.length === 0 && data.images && data.images.length > 0) {
+          heroSlides = data.images.map(url => ({ type: "image", url }));
+        }
+        if (heroSlides.length > 0) setSlides(heroSlides);
         if (data.typingLines && data.typingLines.length > 0) setTypingLines(data.typingLines);
       }
     });
@@ -77,10 +82,12 @@ export default function Home() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentImage((prev) => (prev + 1) % images.length);
+      setCurrentImage((prev) => (prev + 1) % slides.length);
     }, 6000);
     return () => clearInterval(interval);
-  }, [images.length]);
+  }, [slides.length]);
+
+  const activeSlide = slides[currentImage];
 
   return (
     <div className="flex flex-col min-h-screen overflow-x-hidden">
@@ -99,32 +106,56 @@ export default function Home() {
             }}
             className="absolute inset-0"
           >
-            <Image
-              src={images[currentImage]}
-              alt="Crochet background"
-              fill
-              className="object-cover object-center"
-              priority
-            />
+            {activeSlide?.type === "video" ? (
+              <video
+                src={activeSlide.url}
+                autoPlay
+                muted
+                loop
+                playsInline
+                className="w-full h-full object-cover object-center"
+              />
+            ) : (
+              <Image
+                src={activeSlide?.url || "/img1.png"}
+                alt="Crochet background"
+                fill
+                className="object-cover object-center"
+                priority
+              />
+            )}
             {/* Dark Overlay */}
-            <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px]"></div>
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-[0.5px]"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20"></div>
           </motion.div>
         </AnimatePresence>
 
         {/* Content */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
-          className="relative z-10 text-center px-4 w-full flex flex-col items-center"
-        >
-          <h1 className="text-3xl md:text-6xl font-serif font-bold text-white mb-4 sm:mb-6 leading-tight drop-shadow-lg max-w-4xl mx-auto">
+        <div className="relative z-10 text-center px-4 w-full flex flex-col items-center">
+          <motion.h1 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="text-3xl md:text-6xl font-serif font-medium text-white mb-4 sm:mb-6 leading-tight drop-shadow-lg max-w-4xl mx-auto"
+          >
             Cozy Crochet Creations
-          </h1>
-          <div className="text-base md:text-xl text-white/90 mb-6 sm:mb-8 lg:mb-10 font-medium h-[3em] flex items-center justify-center">
+          </motion.h1>
+          
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+            className="text-base md:text-xl text-white/90 mb-6 sm:mb-8 lg:mb-10 font-medium font-serif h-[3em] flex items-center justify-center"
+          >
             <Typewriter texts={typingLines} />
-          </div>
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center w-full sm:w-auto px-4 sm:px-0">
+          </motion.div>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+            className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center w-full sm:w-auto px-4 sm:px-0"
+          >
             <Link
               href="/shop"
               className="min-w-[150px] sm:min-w-0 sm:w-auto px-8 py-2.5 sm:px-10 sm:py-3.5 text-sm sm:text-base bg-[var(--color-primary)] text-white rounded-full font-bold shadow-xl shadow-[var(--color-primary)]/20 hover:scale-105 active:scale-95 transition-all text-center whitespace-nowrap cursor-pointer"
@@ -137,12 +168,12 @@ export default function Home() {
             >
               Custom Order
             </Link>
-          </div>
-        </motion.div>
+          </motion.div>
+        </div>
 
         {/* Slider Indicators */}
         <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex gap-3 z-10">
-          {images.map((_, idx) => (
+          {slides.map((_, idx) => (
             <button
               key={idx}
               onClick={() => setCurrentImage(idx)}
@@ -216,7 +247,7 @@ function TestimonialsSection() {
         className="w-full"
       >
         <div className="text-center mb-6 sm:mb-8 lg:mb-10">
-          <h2 className="text-2xl md:text-4xl font-serif text-[var(--color-text-main)] mb-3 font-bold">Happy Customers</h2>
+          <h2 className="text-2xl md:text-4xl font-serif text-[var(--color-text-main)] mb-3 font-medium">Happy Customers</h2>
           <p className="text-sm text-[var(--color-text-muted)] italic">"What they say about our handmade creations"</p>
         </div>
 

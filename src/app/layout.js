@@ -3,6 +3,7 @@ import "./globals.css";
 import AuthInitializer from "@/components/AuthInitializer";
 import LayoutWrapper from "@/components/LayoutWrapper";
 import { Toaster } from "react-hot-toast";
+import SignupModal from "@/components/SignupModal";
 
 const nunito = Nunito({
   variable: "--font-nunito",
@@ -38,6 +39,7 @@ export default function RootLayout({ children }) {
         />
         <AuthInitializer />
         <LayoutWrapper>
+          <SignupModal />
           {children}
         </LayoutWrapper>
       </body>

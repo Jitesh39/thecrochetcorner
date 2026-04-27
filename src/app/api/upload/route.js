@@ -19,9 +19,13 @@ export async function POST(request) {
     // Upload to Cloudinary using base64 string
     const uploadResponse = await cloudinary.uploader.upload(file, {
       folder: "crochet_corner_products",
+      resource_type: "auto",
     });
 
-    return NextResponse.json({ url: uploadResponse.secure_url });
+    return NextResponse.json({ 
+      url: uploadResponse.secure_url,
+      resource_type: uploadResponse.resource_type 
+    });
   } catch (error) {
     console.log("UPLOAD ERROR DETAILED:", error);
     return NextResponse.json({

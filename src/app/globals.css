@@ -25,14 +25,24 @@
     padding: 0;
     overflow-x: hidden;
   }
-  
-  h1, h2, h3, h4, h5, h6 {
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: var(--font-serif);
-    font-weight: 500;
+    font-weight: 500; /* Medium weight for premium look */
+    line-height: 1.2;
+  }
+
+  p, span, div, button, input, textarea, a {
+    font-family: var(--font-sans);
   }
 
   /* Global Cursor Behavior */
-  button, 
+  button,
   a,
   input[type="button"],
   input[type="submit"],
@@ -66,11 +76,12 @@
     align-items: center;
     justify-content: center;
   }
+
   .btn-primary:hover {
     background-color: var(--color-primary-dark);
     box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
   }
-  
+
   .btn-secondary {
     background-color: white;
     color: var(--color-primary);
@@ -84,10 +95,11 @@
     align-items: center;
     justify-content: center;
   }
+
   .btn-secondary:hover {
     background-color: var(--color-secondary);
   }
-  
+
   .card {
     background-color: white;
     border-radius: 1rem;
@@ -96,6 +108,7 @@
     overflow: hidden;
     border: 1px solid #f3f4f6;
   }
+
   .card:hover {
     box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
   }
@@ -105,9 +118,9 @@
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
+
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
 }
-

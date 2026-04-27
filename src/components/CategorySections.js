@@ -66,30 +66,64 @@ export default function CategorySections() {
       }).slice(0, 5)
     };
   }).filter(cat => cat.products.length > 0);
+  
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5, ease: "easeOut" },
+    },
+  };
 
   return (
     <section className="w-full px-6 sm:px-12 lg:px-20 py-6 sm:py-12 bg-[#faf9f8] overflow-hidden">
       <div className="w-full">
         {/* Main Header */}
-        <div className="text-center mb-8 sm:mb-14 animate-fade-in px-4">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-8 sm:mb-14 px-4"
+        >
           <span className="text-[var(--color-primary)] font-medium text-[10px] uppercase tracking-[0.4em] mb-4 block">
             BROWSE BY CATEGORY
           </span>
-          <h2 className="text-2xl md:text-5xl font-serif font-bold text-[var(--color-text-main)] mb-4 leading-tight">
+          <h2 className="text-2xl md:text-5xl font-serif font-medium text-[var(--color-text-main)] mb-4 leading-tight">
             Shop By Category
           </h2>
           <div className="h-0.5 w-16 bg-[var(--color-primary)] mx-auto mt-6 opacity-30"></div>
-        </div>
+        </motion.div>
 
         {/* Categories Sections */}
         <div className="space-y-12 sm:space-y-20">
           {loading ? (
             <div className="py-20 text-center font-bold text-gray-400">Loading shop categories...</div>
           ) : categories.map((cat, idx) => (
-            <div key={idx} className="animate-slide-up">
+            <motion.div 
+              key={idx}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-100px" }}
+              variants={containerVariants}
+            >
               {/* Section Header */}
-              <div className="flex justify-between items-end mb-4 sm:mb-6 border-b border-gray-100 pb-2">
-                <h3 className="text-xl md:text-3xl font-serif font-bold text-[var(--color-text-main)] transition-colors hover:text-[var(--color-primary)] cursor-default">
+              <motion.div 
+                variants={itemVariants}
+                className="flex justify-between items-end mb-4 sm:mb-6 border-b border-gray-100 pb-2"
+              >
+                <h3 className="text-xl md:text-3xl font-serif font-medium text-[var(--color-text-main)] transition-colors hover:text-[var(--color-primary)] cursor-default">
                   {cat.title}
                 </h3>
                 <Link
@@ -98,61 +132,64 @@ export default function CategorySections() {
                 >
                   View All <span className="transition-transform group-hover:translate-x-1">&rarr;</span>
                 </Link>
-              </div>
+              </motion.div>
 
               {/* Product Grid - Exactly 5 items on desktop */}
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 px-1 sm:px-2">
                 {cat.products.map((product) => (
-                  <Link
-                    key={product.id}
-                    href={`/product/${product.productId || product.id}`}
-                    className="group bg-[#f5f1ed]/50 hover:bg-white rounded-xl p-3 sm:p-5 transition-all duration-500 shadow-sm hover:shadow-xl border border-transparent hover:border-gray-50 flex flex-col h-full"
-                  >
-                    {/* Image Area */}
-                    <div className="relative w-full h-[130px] sm:h-[240px] rounded-lg overflow-hidden mb-3 bg-gray-50 flex items-center justify-center group-hover:bg-white transition-colors">
-                      <div className="relative w-full h-full transition-transform duration-700 group-hover:scale-110">
-                        <Image
-                          src={product.imageUrl || "/img1.png"}
-                          alt={product.name}
-                          fill
-                          className="object-contain"
-                          sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Info */}
-                    <div className="flex flex-col flex-grow">
-                      <h4 className="text-sm sm:text-base font-serif text-[var(--color-text-main)] mb-1 line-clamp-1 leading-snug group-hover:text-[var(--color-primary)] transition-colors">
-                        {product.name}
-                      </h4>
-
-                      <div className="flex items-center gap-1 mb-2 text-yellow-400">
-                        <Star size={10} fill="currentColor" />
-                        <span className="text-[10px] text-gray-400 font-medium ml-1">
-                          5.0
-                        </span>
+                  <motion.div key={product.id} variants={itemVariants}>
+                    <Link
+                      href={`/product/${product.productId || product.id}`}
+                      className="group bg-[#f5f1ed]/50 hover:bg-white rounded-xl p-3 sm:p-5 transition-all duration-500 shadow-sm hover:shadow-xl border border-transparent hover:border-gray-50 flex flex-col h-full"
+                    >
+                      {/* Image Area */}
+                      <div className="relative w-full h-[130px] sm:h-[240px] rounded-lg overflow-hidden mb-3 bg-gray-50 flex items-center justify-center group-hover:bg-white transition-colors">
+                        <div className="relative w-full h-full transition-transform duration-700 group-hover:scale-110">
+                          <Image
+                            src={product.imageUrl || "/img1.png"}
+                            alt={product.name}
+                            fill
+                            className="object-contain"
+                            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                          />
+                        </div>
                       </div>
 
-                      <div className="mt-auto flex flex-col gap-2">
-                        <span className="text-sm sm:text-lg font-bold text-[var(--color-text-main)]">₹{product.price}</span>
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            addItem(product);
-                          }}
-                          className="w-[90%] mx-auto mt-1 flex items-center justify-center gap-2 text-[10px] sm:text-xs font-bold border border-gray-200 py-1.5 rounded-xl hover:bg-[var(--color-primary)] hover:text-white hover:border-[var(--color-primary)] transition-all"
-                        >
-                          <ShoppingBag size={18} strokeWidth={2.5} />
-                          Add to Cart
-                        </button>
+                      {/* Info */}
+                      <div className="flex flex-col flex-grow">
+                        <h4 className="text-sm sm:text-base font-sans text-[var(--color-text-main)] mb-1 line-clamp-1 leading-snug group-hover:text-[var(--color-primary)] transition-colors">
+                          {product.name}
+                        </h4>
+
+                        <div className="flex items-center gap-1 mb-2 text-yellow-400">
+                          <Star size={10} fill="currentColor" />
+                          <span className="text-[10px] text-gray-400 font-medium ml-1">
+                            5.0
+                          </span>
+                        </div>
+
+                        <div className="mt-auto flex flex-col gap-2">
+                          <span className="text-sm sm:text-lg font-bold text-[var(--color-text-main)]">₹{product.price}</span>
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              addItem(product);
+                            }}
+                            className="w-[90%] mx-auto mt-1 flex items-center justify-center gap-2 text-[10px] sm:text-xs font-bold border border-gray-200 py-1.5 rounded-xl hover:bg-[var(--color-primary)] hover:text-white hover:border-[var(--color-primary)] transition-all"
+                          >
+                            <ShoppingBag size={18} strokeWidth={2.5} />
+                            Add to Cart
+                          </motion.button>
+                        </div>
                       </div>
-                    </div>
-                  </Link>
+                    </Link>
+                  </motion.div>
                 ))}
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

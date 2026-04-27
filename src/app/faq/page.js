@@ -109,6 +109,25 @@ export default function FAQPage() {
     )
   })).filter(section => section.items.length > 0);
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5, ease: "easeOut" },
+    },
+  };
+
   return (
     <div className="bg-gray-50 min-h-screen py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
@@ -143,7 +162,12 @@ export default function FAQPage() {
         </div>
 
         {/* Search Bar */}
-        <div className="relative mb-12 max-w-lg mx-auto">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="relative mb-12 max-w-lg mx-auto"
+        >
           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
             <Search className="text-gray-400" size={18} />
           </div>
@@ -154,19 +178,25 @@ export default function FAQPage() {
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-11 pr-4 py-4 bg-white border border-gray-100 rounded-2xl shadow-sm focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-all outline-none text-gray-700"
           />
-        </div>
+        </motion.div>
 
         {/* FAQ List */}
         <div className="space-y-10">
           {filteredFaq.length > 0 ? (
             filteredFaq.map((section, sIndex) => (
-              <div key={sIndex}>
-                <div className="flex items-center gap-3 mb-6">
+              <motion.div 
+                key={sIndex}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-50px" }}
+                variants={containerVariants}
+              >
+                <motion.div variants={itemVariants} className="flex items-center gap-3 mb-6">
                   <div className="p-2 bg-white rounded-xl shadow-sm border border-gray-100">
                     {section.icon}
                   </div>
                   <h2 className="text-xl font-serif font-bold text-gray-800">{section.title}</h2>
-                </div>
+                </motion.div>
 
                 <div className="space-y-3">
                   {section.items.map((item, i) => {
@@ -176,6 +206,7 @@ export default function FAQPage() {
                     return (
                       <motion.div
                         key={index}
+                        variants={itemVariants}
                         layout
                         className={`bg-white border rounded-2xl transition-all duration-300 ${isOpen ? 'border-[var(--color-primary)] ring-4 ring-[var(--color-primary)]/5' : 'border-gray-100 hover:border-gray-200 shadow-sm'}`}
                       >
@@ -216,7 +247,7 @@ export default function FAQPage() {
                     );
                   })}
                 </div>
-              </div>
+              </motion.div>
             ))
           ) : (
             <div className="text-center py-20 bg-white rounded-3xl border border-gray-100 shadow-sm">
