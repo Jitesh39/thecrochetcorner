@@ -11,54 +11,57 @@ import { collection, query, where, getDocs, limit } from "firebase/firestore";
 export default function SignupModal() {
   const [isOpen, setIsOpen] = useState(false);
   const [hasShown, setHasShown] = useState(false);
-  const [modalType, setModalType] = useState(null); // 'GUEST' | 'CUSTOMER_NEW' | null
+  const [modalType, setModalType] = useState(null); // 'CUSTOMER_NEW' | null
   const { user, loading } = useAuthStore();
 
   useEffect(() => {
     if (loading) return;
 
+    // Condition 1: User must be logged in
+    if (!user) {
+      setModalType(null);
+      return;
+    }
+
     const checkStatusAndShow = async () => {
-      // Check if already shown in session
-      const shownBefore = sessionStorage.getItem("signup_modal_shown");
+      // Condition 2: Show ONLY ONCE per browser session
+      const shownBefore = sessionStorage.getItem("firstOrderOfferShown");
       if (shownBefore) {
         setHasShown(true);
         return;
       }
 
-      if (!user) {
-        setModalType('GUEST');
-      } else {
-        // User is logged in, check order history
-        try {
-          const ordersRef = collection(db, "orders");
-          const q = query(ordersRef, where("userId", "==", user.uid), limit(1));
-          const querySnapshot = await getDocs(q);
+      // User is logged in, check order history
+      try {
+        const ordersRef = collection(db, "orders");
+        const q = query(ordersRef, where("userId", "==", user.uid), limit(1));
+        const querySnapshot = await getDocs(q);
 
-          if (querySnapshot.empty) {
-            setModalType('CUSTOMER_NEW');
-          } else {
-            // User has orders, do not show any modal
-            setModalType(null);
-            setHasShown(true); // Effectively disable it for this session
-            return;
-          }
-        } catch (error) {
-          console.error("Error checking order history:", error);
+        // Condition 3: User has NOT placed any order
+        if (querySnapshot.empty) {
+          setModalType('CUSTOMER_NEW');
+        } else {
+          // User has orders, do not show any modal
           setModalType(null);
+          setHasShown(true);
           return;
         }
+      } catch (error) {
+        console.error("Error checking order history:", error);
+        setModalType(null);
+        return;
       }
 
       // Trigger after 3 seconds
       const timer = setTimeout(() => {
-        if (!hasShown && modalType) {
+        if (!hasShown && modalType === 'CUSTOMER_NEW') {
           showModal();
         }
       }, 3000);
 
       // Trigger on 40% scroll
       const handleScroll = () => {
-        if (hasShown || !modalType) return;
+        if (hasShown || modalType !== 'CUSTOMER_NEW') return;
 
         const scrollY = window.scrollY;
         const height = document.documentElement.scrollHeight - window.innerHeight;
@@ -83,7 +86,7 @@ export default function SignupModal() {
   const showModal = () => {
     setIsOpen(true);
     setHasShown(true);
-    sessionStorage.setItem("signup_modal_shown", "true");
+    sessionStorage.setItem("firstOrderOfferShown", "true");
     document.body.style.overflow = "hidden"; // Disable scroll
   };
 
@@ -94,15 +97,6 @@ export default function SignupModal() {
 
   // Content Mapping
   const content = {
-    GUEST: {
-      tag: "A Cozy Surprise Awaits ✨",
-      title: "Welcome to The Crochet Corner 🧶",
-      subtitle: "Signup & get FREE delivery on your first order 🎁",
-      description: "Handmade crochet products crafted with love. Join our community now & unlock your first perk!",
-      ctaText: "Signup & Claim Offer",
-      ctaLink: "/login",
-      icon: <Gift className="text-[var(--color-primary)]" size={20} />
-    },
     CUSTOMER_NEW: {
       tag: "Special Offer For You 🚚",
       title: "Free Delivery on Your First Order",
