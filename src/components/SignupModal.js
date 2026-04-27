@@ -2,53 +2,83 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Gift, Sparkles } from "lucide-react";
+import { X, Gift, Sparkles, Truck } from "lucide-react";
 import Link from "next/link";
 import { useAuthStore } from "@/store/authStore";
+import { db } from "@/lib/firebase";
+import { collection, query, where, getDocs, limit } from "firebase/firestore";
 
 export default function SignupModal() {
   const [isOpen, setIsOpen] = useState(false);
   const [hasShown, setHasShown] = useState(false);
+  const [modalType, setModalType] = useState(null); // 'GUEST' | 'CUSTOMER_NEW' | null
   const { user, loading } = useAuthStore();
 
   useEffect(() => {
-    // Don't show if user is already logged in or still loading
-    if (user || loading) return;
+    if (loading) return;
 
-    // Check if user has already seen the modal in this session
-    const shownBefore = sessionStorage.getItem("signup_modal_shown");
-    if (shownBefore) {
-      setHasShown(true);
-      return;
-    }
-
-    // Trigger after 3 seconds
-    const timer = setTimeout(() => {
-      if (!hasShown) {
-        showModal();
+    const checkStatusAndShow = async () => {
+      // Check if already shown in session
+      const shownBefore = sessionStorage.getItem("signup_modal_shown");
+      if (shownBefore) {
+        setHasShown(true);
+        return;
       }
-    }, 3000);
 
-    // Trigger on 40% scroll
-    const handleScroll = () => {
-      if (hasShown) return;
-      
-      const scrollY = window.scrollY;
-      const height = document.documentElement.scrollHeight - window.innerHeight;
-      const scrolled = (scrollY / height) * 100;
+      if (!user) {
+        setModalType('GUEST');
+      } else {
+        // User is logged in, check order history
+        try {
+          const ordersRef = collection(db, "orders");
+          const q = query(ordersRef, where("userId", "==", user.uid), limit(1));
+          const querySnapshot = await getDocs(q);
 
-      if (scrolled >= 40) {
-        showModal();
+          if (querySnapshot.empty) {
+            setModalType('CUSTOMER_NEW');
+          } else {
+            // User has orders, do not show any modal
+            setModalType(null);
+            setHasShown(true); // Effectively disable it for this session
+            return;
+          }
+        } catch (error) {
+          console.error("Error checking order history:", error);
+          setModalType(null);
+          return;
+        }
       }
+
+      // Trigger after 3 seconds
+      const timer = setTimeout(() => {
+        if (!hasShown && modalType) {
+          showModal();
+        }
+      }, 3000);
+
+      // Trigger on 40% scroll
+      const handleScroll = () => {
+        if (hasShown || !modalType) return;
+
+        const scrollY = window.scrollY;
+        const height = document.documentElement.scrollHeight - window.innerHeight;
+        const scrolled = (scrollY / height) * 100;
+
+        if (scrolled >= 40) {
+          showModal();
+        }
+      };
+
+      window.addEventListener("scroll", handleScroll);
+
+      return () => {
+        clearTimeout(timer);
+        window.removeEventListener("scroll", handleScroll);
+      };
     };
 
-    window.addEventListener("scroll", handleScroll);
-
-    return () => {
-      clearTimeout(timer);
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, [hasShown, user, loading]);
+    checkStatusAndShow();
+  }, [user, loading, hasShown, modalType]);
 
   const showModal = () => {
     setIsOpen(true);
@@ -62,9 +92,33 @@ export default function SignupModal() {
     document.body.style.overflow = "unset"; // Enable scroll
   };
 
+  // Content Mapping
+  const content = {
+    GUEST: {
+      tag: "A Cozy Surprise Awaits ✨",
+      title: "Welcome to The Crochet Corner 🧶",
+      subtitle: "Signup & get FREE delivery on your first order 🎁",
+      description: "Handmade crochet products crafted with love. Join our community now & unlock your first perk!",
+      ctaText: "Signup & Claim Offer",
+      ctaLink: "/login",
+      icon: <Gift className="text-[var(--color-primary)]" size={20} />
+    },
+    CUSTOMER_NEW: {
+      tag: "Special Offer For You 🚚",
+      title: "Free Delivery on Your First Order",
+      subtitle: "Claim your exclusive offer now",
+      description: "Start your crochet journey today. Enjoy free shipping on any item from our latest collection!",
+      ctaText: "Claim Offer",
+      ctaLink: "/shop",
+      icon: <Truck className="text-[var(--color-primary)]" size={20} />
+    }
+  };
+
+  const activeContent = content[modalType];
+
   return (
     <AnimatePresence>
-      {isOpen && (
+      {isOpen && activeContent && (
         <>
           {/* Overlay */}
           <motion.div
@@ -104,36 +158,35 @@ export default function SignupModal() {
               >
                 <Sparkles size={14} className="text-[var(--color-primary)]" />
                 <span className="text-[10px] font-bold text-[var(--color-primary)] uppercase tracking-[0.2em]">
-                  Limited Time Offer
+                  {activeContent.tag}
                 </span>
               </motion.div>
 
-              <div className="flex items-center justify-center gap-3 mb-4">
-                <h2 className="text-2xl sm:text-3xl font-serif font-medium text-[var(--color-text-main)]">
-                  Welcome to The Crochet Corner
+              <div className="flex flex-col items-center justify-center gap-3 mb-4">
+                <h2 className="text-2xl sm:text-3xl font-serif font-medium text-[var(--color-text-main)] leading-tight">
+                  {activeContent.title}
                 </h2>
-                <span className="text-3xl">🧶</span>
               </div>
 
               <div className="flex flex-col gap-3 mb-8">
                 <p className="text-lg sm:text-xl font-medium text-[var(--color-primary)] flex items-center justify-center gap-2">
-                  Signup now & get FREE delivery on your first order <Gift size={20} className="inline" />
+                  {activeContent.subtitle} {activeContent.icon}
                 </p>
                 <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">
-                  Handmade crochet products crafted with love. Join our community now & unlock your first perk!
+                  {activeContent.description}
                 </p>
               </div>
 
               {/* CTA Buttons */}
               <div className="flex flex-col gap-4 w-full">
                 <Link
-                  href="/login"
+                  href={activeContent.ctaLink}
                   onClick={closeModal}
                   className="w-full py-4 bg-gradient-to-r from-[var(--color-primary)] to-[#ff8da1] text-white rounded-full font-bold shadow-xl shadow-[var(--color-primary)]/20 hover:scale-[1.02] active:scale-[0.98] transition-all text-center flex items-center justify-center gap-2"
                 >
-                  Signup & Claim Offer
+                  {activeContent.ctaText}
                 </Link>
-                
+
                 <button
                   onClick={closeModal}
                   className="text-sm font-medium text-gray-400 hover:text-gray-600 transition-colors py-2"
@@ -143,7 +196,7 @@ export default function SignupModal() {
               </div>
             </div>
 
-            {/* Aesthetic Background Sparkles (Optional Decorations) */}
+            {/* Aesthetic Background Sparkles */}
             <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden rounded-t-[2.5rem]">
               <div className="absolute -top-10 -left-10 w-40 h-40 bg-[var(--color-primary)]/5 rounded-full blur-3xl" />
               <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-[var(--color-primary)]/5 rounded-full blur-3xl" />
@@ -154,3 +207,4 @@ export default function SignupModal() {
     </AnimatePresence>
   );
 }
+
