@@ -39,7 +39,7 @@ export default function MobileDrawer({ isOpen, setIsOpen }) {
       await signOut(auth);
       localStorage.clear();
       setIsOpen(false);
-      toast.success("Logged out successfully");
+      toast("Signed out");
       router.push("/login");
     } catch (error) {
       console.error("Logout error: ", error);

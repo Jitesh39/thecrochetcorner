@@ -70,11 +70,11 @@ export default function CartDrawer() {
       {isDrawerOpen && (
         <motion.div
           key="cart-drawer"
-          initial={{ x: "-100%" }}
+          initial={{ x: "100%" }}
           animate={{ x: 0 }}
-          exit={{ x: "-100%" }}
+          exit={{ x: "100%" }}
           transition={{ type: "spring", damping: 25, stiffness: 200, duration: 0.4 }}
-          className="fixed top-0 left-0 h-full w-full sm:w-[420px] bg-white shadow-2xl z-[9999] flex flex-col"
+          className="fixed top-0 right-0 h-full w-full sm:w-[420px] bg-white shadow-2xl z-[9999] flex flex-col"
         >
           {/* Header */}
           <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-white sticky top-0 z-10">

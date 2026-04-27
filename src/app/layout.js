@@ -2,7 +2,7 @@ import { Nunito, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import AuthInitializer from "@/components/AuthInitializer";
 import LayoutWrapper from "@/components/LayoutWrapper";
-import { Toaster } from "react-hot-toast";
+import ToasterProvider from "@/components/ToasterProvider";
 import SignupModal from "@/components/SignupModal";
 
 const nunito = Nunito({
@@ -24,19 +24,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body suppressHydrationWarning className={`${nunito.variable} ${playfair.variable} antialiased min-h-screen flex flex-col`}>
-        <Toaster
-          position="top-center"
-          containerStyle={{ zIndex: 100000 }}
-          toastOptions={{
-            duration: 5000,
-            style: {
-              borderRadius: '12px',
-              background: '#f8c8dc',
-              color: '#ffffff',
-              fontWeight: '600',
-            },
-          }}
-        />
+        <ToasterProvider />
         <AuthInitializer />
         <LayoutWrapper>
           <SignupModal />

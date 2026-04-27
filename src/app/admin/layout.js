@@ -63,7 +63,7 @@ export default function AdminLayout({ children }) {
     try {
       await signOut(auth);
       localStorage.clear();
-      toast.success("Logged out successfully");
+      toast("Signed out");
       router.push("/login");
     } catch (error) {
       toast.error("Failed to log out");

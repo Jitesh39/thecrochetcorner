@@ -37,7 +37,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
     try {
       await signOut(auth);
       localStorage.clear();
-      toast.success("Logged out successfully");
+      toast("Signed out");
       router.push("/login");
     } catch (error) {
       console.error("Logout error: ", error);
