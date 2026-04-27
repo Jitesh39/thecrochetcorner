@@ -17,29 +17,25 @@ import toast from "react-hot-toast";
 export default function AdminLayout({ children }) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const { user, userData, role, loading } = useAuthStore();
+  const router = useRouter();
+
   const [adminProfile, setAdminProfile] = useState({
     name: "Admin User",
     profileImage: "",
-    role: "Store Manager"
+    role: "Admin"
   });
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const { user, role, loading } = useAuthStore();
-  const router = useRouter();
 
-  // Listen for admin profile changes
   useEffect(() => {
-    const unsub = onSnapshot(doc(db, "admin", "profile"), (docSnap) => {
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        setAdminProfile({
-          name: data.name || "Admin User",
-          profileImage: data.profileImage || "",
-          role: "Admin"
-        });
-      }
-    });
-    return () => unsub();
-  }, []);
+    if (userData) {
+      setAdminProfile({
+        name: userData.name || user?.displayName || "Admin User",
+        profileImage: userData.profileImage || user?.photoURL || "",
+        role: "Admin"
+      });
+    }
+  }, [userData, user]);
 
   // Listen for unread notifications
   useEffect(() => {

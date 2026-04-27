@@ -8,22 +8,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { useAuthStore } from "@/store/authStore";
+
 export default function AdminProfilePage() {
-  const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { userData, user, loading: authLoading } = useAuthStore();
   const router = useRouter();
 
-  useEffect(() => {
-    const unsub = onSnapshot(doc(db, "admin", "profile"), (docSnap) => {
-      if (docSnap.exists()) {
-        setProfile(docSnap.data());
-      }
-      setLoading(false);
-    });
-    return () => unsub();
-  }, []);
-
-  if (loading) {
+  if (authLoading) {
     return (
       <div className="min-h-[400px] flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin"></div>
@@ -31,11 +22,12 @@ export default function AdminProfilePage() {
     );
   }
 
-  const adminData = profile || {
-    name: "Admin User",
-    email: "admin@thecrochetcorner.com",
-    phone: "Not provided",
-    profileImage: ""
+  const adminData = {
+    name: userData?.name || user?.displayName || "Admin User",
+    email: userData?.email || user?.email || "admin@thecrochetcorner.com",
+    phone: userData?.phone || "Not provided",
+    profileImage: userData?.profileImage || user?.photoURL || "",
+    updatedAt: userData?.updatedAt || null
   };
 
   return (

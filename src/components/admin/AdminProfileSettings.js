@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { db, auth } from "@/lib/firebase";
-import { doc, onSnapshot, setDoc, serverTimestamp } from "firebase/firestore";
-import { onAuthStateChanged } from "firebase/auth";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { User, Mail, Phone, Camera, Loader2, Save, Info } from "lucide-react";
 import Image from "next/image";
 import toast from "react-hot-toast";
+import { useAuthStore } from "@/store/authStore";
 
 export default function AdminProfileSettings() {
   const [profile, setProfile] = useState({
@@ -18,37 +18,20 @@ export default function AdminProfileSettings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
+  
+  const { user, userData, setUserData } = useAuthStore();
 
   useEffect(() => {
-    // 1. Listen for Auth changes to get Name and Email
-    const unsubAuth = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setProfile(prev => ({
-          ...prev,
-          name: user.displayName || "Admin User",
-          email: user.email || ""
-        }));
-      }
-    });
-
-    // 2. Listen for Firestore changes to get Phone and Image
-    const unsubFirestore = onSnapshot(doc(db, "admin", "profile"), (docSnap) => {
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        setProfile(prev => ({
-          ...prev,
-          phone: data.phone || "",
-          profileImage: data.profileImage || ""
-        }));
-      }
+    if (user) {
+      setProfile({
+        name: userData?.name || user.displayName || "Admin User",
+        email: userData?.email || user.email || "",
+        phone: userData?.phone || "",
+        profileImage: userData?.profileImage || user.photoURL || ""
+      });
       setLoading(false);
-    });
-
-    return () => {
-      unsubAuth();
-      unsubFirestore();
-    };
-  }, []);
+    }
+  }, [user, userData]);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -68,6 +51,7 @@ export default function AdminProfileSettings() {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    if (!user) return;
     setSaving(true);
 
     try {
@@ -85,11 +69,18 @@ export default function AdminProfileSettings() {
         imageUrl = resData.url;
       }
 
-      await setDoc(doc(db, "admin", "profile"), {
+      const updatedData = {
+        name: profile.name,
+        email: profile.email,
         phone: profile.phone,
         profileImage: imageUrl,
         updatedAt: serverTimestamp()
-      }, { merge: true });
+      };
+
+      await setDoc(doc(db, "users", user.uid), updatedData, { merge: true });
+
+      // Update local state in authStore
+      setUserData({ ...userData, ...updatedData });
 
       toast.success("Profile updated successfully!");
       setPreviewUrl(null);
